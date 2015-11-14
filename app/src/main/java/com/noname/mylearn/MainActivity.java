@@ -1,16 +1,21 @@
 package com.noname.mylearn;
 
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class MainActivity extends ActionBarActivity {
+    DialogFragment dlg1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        dlg1 = new DictDialog();
     }
 
     @Override
@@ -33,5 +38,15 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void buttonClick(View v) {
+        switch (v.getId()) {
+            case R.id.button1:
+                dlg1.show(getSupportFragmentManager(), "dlg1");
+                break;
+            default:
+                break;
+        }
     }
 }

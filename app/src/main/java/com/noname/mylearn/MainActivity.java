@@ -1,5 +1,6 @@
 package com.noname.mylearn;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
@@ -44,6 +45,10 @@ public class MainActivity extends ActionBarActivity {
         switch (v.getId()) {
             case R.id.button1:
                 dlg1.show(getSupportFragmentManager(), "dlg1");
+                break;
+            case R.id.button2:
+                Intent intent = new Intent(this, AddWord.class);
+                startActivity(intent);
                 break;
             default:
                 break;

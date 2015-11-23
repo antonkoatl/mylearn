@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Словарь"
-        android:id="@+id/button1"
+        android:id="@+id/button_dict"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:onClick="buttonClick"/>
@@ -22,9 +22,9 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Добавить"
-        android:id="@+id/button2"
-        android:layout_below="@+id/button1"
+        android:text="Редактировать"
+        android:id="@+id/button_editDict"
+        android:layout_below="@+id/button_dict"
         android:layout_centerHorizontal="true"
         android:onClick="buttonClick"/>
 
@@ -33,6 +33,6 @@
         android:layout_height="wrap_content"
         android:text="Учить"
         android:id="@+id/button3"
-        android:layout_below="@+id/button2"
+        android:layout_below="@+id/button_editDict"
         android:layout_centerHorizontal="true"/>
 </RelativeLayout>

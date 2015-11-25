@@ -43,11 +43,12 @@ public class MainActivity extends ActionBarActivity {
 
     public void buttonClick(View v) {
         switch (v.getId()) {
-            case R.id.button1:
+            case R.id.button_dict:
                 dlg1.show(getSupportFragmentManager(), "dlg1");
                 break;
-            case R.id.button2:
-                Intent intent = new Intent(this, AddWord.class);
+            case R.id.button_editDict:
+                //Intent intent = new Intent(this, AddWord.class);
+                Intent intent = new Intent(this, EditDict.class);
                 startActivity(intent);
                 break;
             default:

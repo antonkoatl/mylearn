@@ -7,9 +7,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements DictDialog.NoticeDialogListener {
     DialogFragment dlg1;
+    Dictionary currentDict;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +49,18 @@ public class MainActivity extends ActionBarActivity {
                 dlg1.show(getSupportFragmentManager(), "dlg1");
                 break;
             case R.id.button_editDict:
-                //Intent intent = new Intent(this, AddWord.class);
                 Intent intent = new Intent(this, EditDict.class);
                 startActivity(intent);
                 break;
             default:
                 break;
         }
+    }
+
+    @Override
+    public void selectedDict(Dictionary dict) {
+        currentDict = dict;
+        TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
+        textLabel_wordsCount.setText("Количество слов: " + dict.getWordsCount());
     }
 }

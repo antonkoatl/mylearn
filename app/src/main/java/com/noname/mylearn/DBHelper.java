@@ -12,21 +12,34 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 	public static final String dbName = "myDB";
+    public static final int dbVersion = 1;
 
 	public static final String dictTable = "dict_table";
 
-	//dictionaries
+	//dictionaries table
 	public static final String dColId = "_id";
 	public static final String dColName = "name";
 	public static final String dWordsCount = "words_count";
 
-    //words
+    //words table
     public static final String wColId = "_id";
     public static final String wColWord = "word";
     public static final String wColTranslation = "translation";
 
-	public DBHelper(Context context) {
-		super(context, "myDB", null, 1);
+    // Используем этот класс как синглтон
+    private static DBHelper instance;
+
+    public static DBHelper getInstance(Context context) {
+        if (instance == null) instance = new DBHelper(context.getApplicationContext());
+        return instance;
+    }
+
+    /**
+     * Constructor should be private to prevent direct instantiation.
+     * make call to static method "getInstance()" instead.
+     */
+    private DBHelper(Context context) {
+		super(context, dbName, null, dbVersion);
 	}
 
 	@Override
@@ -44,7 +57,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		db.execSQL("create table IF NOT EXISTS " + dictTable + " ("
                 + dColId + " integer primary key autoincrement,"
                 + dColName + " text,"
-                + dWordsCount + " integer,"
+                + dWordsCount + " integer"
                 + ");");
 	}
 
@@ -52,17 +65,17 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table IF NOT EXISTS " + table_name + " ("
                 + wColId + " integer primary key autoincrement,"
                 + wColWord + " text unique,"
-                + wColTranslation + " text,"
+                + wColTranslation + " text"
                 + ");");
     }
 
-	public void insertDict(Dictionary dict){
+	public long insertDict(Dictionary dict){
 		ContentValues cv = new ContentValues();
 		cv.put(dColName, dict.getName());
 		cv.put(dWordsCount, dict.getWordsCount());
 
 		SQLiteDatabase db = getWritableDatabase();
-		db.insert(dictTable, null, cv);
+		return db.insert(dictTable, null, cv);
 	}
 
     public void insertWord(Dictionary dict, Word word) {
@@ -96,7 +109,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	        	Dictionary dict = new Dictionary();
                 dict.setName( cursor.getString( cursor.getColumnIndex(dColName) ) );
                 dict.setId( cursor.getInt(cursor.getColumnIndex(dColId)) );
-                dict.setWordsCount( cursor.getInt(cursor.getColumnIndex(dColId)) );
+                dict.setWordsCount( cursor.getInt(cursor.getColumnIndex(dWordsCount)) );
 
 	        	result.add(dict);
 	        	cursor_chk = cursor.moveToNext();

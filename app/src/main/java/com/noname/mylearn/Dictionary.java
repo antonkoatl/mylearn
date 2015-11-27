@@ -1,9 +1,9 @@
 package com.noname.mylearn;
 
 public class Dictionary {
-    private String name;
-    private int id;
-    private int wordsCount;
+    private String name = "Sample Dict";
+    private long id = -1;
+    private int wordsCount = 0;
 
     public String getName() {
         return name;
@@ -17,11 +17,11 @@ public class Dictionary {
         this.name = name;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

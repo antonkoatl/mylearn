@@ -61,12 +61,17 @@ public class DBHelper extends SQLiteOpenHelper {
                 + ");");
 	}
 
-    private void createWordsTable(SQLiteDatabase db, String table_name){
+    private void createWordsTable(SQLiteDatabase db, long dict_id){
+        String table_name = getWordsTableName(dict_id);
         db.execSQL("create table IF NOT EXISTS " + table_name + " ("
                 + wColId + " integer primary key autoincrement,"
                 + wColWord + " text unique,"
                 + wColTranslation + " text"
                 + ");");
+    }
+
+    public String getWordsTableName(long dict_id) {
+        return "words_" + String.valueOf(dict_id);
     }
 
 	public long insertDict(Dictionary dict){
@@ -75,13 +80,16 @@ public class DBHelper extends SQLiteOpenHelper {
 		cv.put(dWordsCount, dict.getWordsCount());
 
 		SQLiteDatabase db = getWritableDatabase();
-		return db.insert(dictTable, null, cv);
+        long dict_id = db.insert(dictTable, null, cv);
+
+        createWordsTable(db, dict_id);
+
+		return dict_id;
 	}
 
-    public void insertWord(Dictionary dict, Word word) {
-        String table_name = "words_" + String.valueOf(dict.getId());
+    public void insertWord(long dict_id, Word word) {
+        String table_name = getWordsTableName(dict_id);
         SQLiteDatabase db = getWritableDatabase();
-        createWordsTable(db, table_name);
 
         ContentValues cv = new ContentValues();
         cv.put(wColWord, word.getWord());
@@ -121,14 +129,14 @@ public class DBHelper extends SQLiteOpenHelper {
 		return result;
 	}
 
-    public List<Word> loadWords(Dictionary dict, int count, int offset){
+    public List<Word> loadWords(long dict_id, int count, int offset){
         List<Word> result = new ArrayList<Word>();
 
         SQLiteDatabase db = getReadableDatabase();
 
         String order_by = wColWord + " DESC";
 
-        Cursor cursor = db.query(dictTable, null, null, null, null, null, order_by);
+        Cursor cursor = db.query(getWordsTableName(dict_id), null, null, null, null, null, order_by);
 
         if(!cursor.moveToFirst()){return result;}
 

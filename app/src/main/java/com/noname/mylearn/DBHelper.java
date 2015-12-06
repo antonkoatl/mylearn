@@ -159,4 +159,9 @@ public class DBHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    public Word getWordById(int word_id, int dict_id){
+        Word result_word = new Word();
+        return result_word;
+    }
+
 }

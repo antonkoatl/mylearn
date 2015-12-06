@@ -9,12 +9,16 @@ public class Dictionary {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public int getWordsCount() {
         return wordsCount;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setWordsCount(int wordsCount) {
+        this.wordsCount = wordsCount;
     }
 
     public void setId(long id) {
@@ -23,9 +27,5 @@ public class Dictionary {
 
     public long getId() {
         return id;
-    }
-
-    public void setWordsCount(int wordsCount) {
-        this.wordsCount = wordsCount;
     }
 }

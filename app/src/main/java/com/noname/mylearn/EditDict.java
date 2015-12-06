@@ -6,7 +6,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class EditDict extends ActionBarActivity{
     public static final int REQUEST_CODE = 100;
@@ -17,6 +20,8 @@ public class EditDict extends ActionBarActivity{
 
 
     String data[] = { "one", "two", "three", "four" };
+    ArrayList<String>words = new ArrayList<String>();
+    ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,10 +30,11 @@ public class EditDict extends ActionBarActivity{
 
         // получаем Intent, который вызывал это Activity
         Intent intent = getIntent();
-
+        //Находим элемент, отображающий список слов
         ListView WordList = (ListView) findViewById(R.id.WordList);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
+        TextView TextViewWord = (TextView) findViewById(R.id.TextViewWord);
+        //заполняем список словами
+        adapter = new ArrayAdapter<String>(this, R.layout.list_item, R.id.TextViewWord, words);
         WordList.setAdapter(adapter);
     }
 
@@ -52,6 +58,8 @@ public class EditDict extends ActionBarActivity{
             // Результат добавления слова
             if(resultCode == EditDict.RESULT_ADDED){
                 Word word = data.getParcelableExtra("word");
+                words.add(word.getWord());
+                adapter.notifyDataSetChanged();
             }
 
             //Результат редактирования слова

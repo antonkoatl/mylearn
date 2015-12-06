@@ -63,9 +63,9 @@ public class DictDialog extends DialogFragment {
             if (which == 0) {
                 Dictionary dict = new Dictionary();
                 dict.setId( DBHelper.getInstance(DictDialog.this.getActivity()).insertDict(dict) );
-                mListener.selectedDict(dict); // Устанавливаем диалог в активити создавшей диалог
+                mListener.selectedDict(dict); // Устанавливаем словарь в активити создавшей диалог
             } else {
-                mListener.selectedDict(dicts.get(which - 1)); // Устанавливаем диалог в активити создавшей диалог
+                mListener.selectedDict(dicts.get(which - 1)); // Устанавливаем словарь в активити создавшей диалог
             }
         }
     };

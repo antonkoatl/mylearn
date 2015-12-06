@@ -159,9 +159,24 @@ public class DBHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public Word getWordById(int word_id, int dict_id){
-        Word result_word = new Word();
-        return result_word;
+    public Word getWordById(long word_id, long dict_id){
+        Word word = null;
+        SQLiteDatabase db = getReadableDatabase();
+
+        String table_name = getWordsTableName(dict_id);
+        String selection = wColId + "=?";
+        String sel_args[] = {String.valueOf(word_id)};
+
+        Cursor cursor = db.query(table_name, null, selection, sel_args, null, null, null);
+
+        if(cursor.moveToFirst()){
+            word = new Word();
+            word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
+            word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
+        }
+        cursor.close();
+
+        return word;
     }
 
 }

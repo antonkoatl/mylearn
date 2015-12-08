@@ -21,6 +21,18 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
         dlg1 = new DictDialog();
     }
 
+    /**@Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("wordsCount", currentDict.getWordsCount());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        currentDict.setWordsCount(savedInstanceState.getInt("wordsCount"));
+    }**/
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -35,7 +47,7 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        // noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -50,6 +62,7 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
                 break;
             case R.id.button_editDict:
                 Intent intent = new Intent(this, EditDict.class);
+                intent.putExtra("idDict", currentDict.getId());
                 startActivity(intent);
                 break;
             default:

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.view.ViewDebug;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,14 +97,31 @@ public class DBHelper extends SQLiteOpenHelper {
         cv.put(wColTranslation, word.getTranslationData());
 
         db.insert(table_name, null, cv);
+        // инкрементируем количество слов
+        changeWordsCount(dict_id, 1);
+    }
+
+    // изменение значения числа слов на delta
+    public void changeWordsCount(long dict_id, int delta){
+        SQLiteDatabase db = getWritableDatabase();
+
+        String where = "_id = " + Long.toString(dict_id);
+
+        int wCount = db.query(dictTable, new String[]{"words_count"}, where, null, null, null, null).getColumnIndex(dWordsCount);
+        wCount = wCount + delta;
+
+        ContentValues cv = new ContentValues();
+        cv.put(dWordsCount, wCount);
+
+        db.update(dictTable, cv, where, null);
     }
 
 	public List<Dictionary> loadDicts(int count, int offset){
 		List<Dictionary> result = new ArrayList<Dictionary>();
 		
 		SQLiteDatabase db = getReadableDatabase();
-		
-		String order_by = dColName + " DESC";
+
+        String order_by = dColName + " DESC";
 		
 		Cursor cursor = db.query(dictTable, null, null, null, null, null, order_by);
 		
@@ -125,8 +143,8 @@ public class DBHelper extends SQLiteOpenHelper {
 	    }
 		
 		cursor.close();
-		
-		return result;
+
+        return result;
 	}
 
     public List<Word> loadWords(long dict_id, int count, int offset){

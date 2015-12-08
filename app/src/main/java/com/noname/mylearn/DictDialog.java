@@ -16,7 +16,7 @@ import java.util.List;
 public class DictDialog extends DialogFragment {
     List<Dictionary> dicts;
 
-    // Интерфейс для передачи диалога в активити
+    // Интерфейс для передачи словря в активити
     public interface NoticeDialogListener {
         public void selectedDict(Dictionary dict);
     }
@@ -42,7 +42,7 @@ public class DictDialog extends DialogFragment {
         List<String> data = new ArrayList<>(); // Список пунктов диалога
         data.add("New"); // Отдельный пункт для добавления словаря
 
-        dicts = DBHelper.getInstance(this.getActivity()).loadDicts(100, 0); // Загрузка 100 диалогов из бд
+        dicts = DBHelper.getInstance(this.getActivity()).loadDicts(100, 0); // Загрузка 100 словарей из бд
         for (Dictionary dict: dicts) {
             data.add(dict.getName());
         }
@@ -58,6 +58,7 @@ public class DictDialog extends DialogFragment {
 
     // Обработчик нажатия на пункт списка диалога
     DialogInterface.OnClickListener myClickListener = new DialogInterface.OnClickListener() {
+
         public void onClick(DialogInterface dialog, int which) {
             // Нулевой элемент - добавление словаря
             if (which == 0) {

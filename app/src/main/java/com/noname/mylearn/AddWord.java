@@ -31,7 +31,7 @@ public class AddWord extends ActionBarActivity {
         // получаем действие
         action = intent.getIntExtra(ACTION, 0);
 
-        //находим поля ввода
+        // находим поля ввода
         EditWord = (EditText) findViewById(R.id.editText);
         EditTranslation = (EditText) findViewById(R.id.editText2);
 
@@ -46,11 +46,18 @@ public class AddWord extends ActionBarActivity {
 
     public void SaveOnClick(View v){
         Intent intent_result = new Intent();
+        // извлекаем id текущего словаря
+        long idDict = getIntent().getLongExtra("idDict", 0);
+        DBHelper dbHelper = DBHelper.getInstance(this.getApplicationContext());
 
         if (action == ADD_WORD) {
             setResult(EditDict.RESULT_ADDED, intent_result);
             word.setWord(EditWord.getText().toString());
             word.setTranslationFromData(EditTranslation.getText().toString());
+
+            // записываем слово в базу данных
+            dbHelper.insertWord(idDict, word);
+
         }
         if (action == EDIT_WORD) {
             setResult(EditDict.RESULT_EDITED, intent_result);

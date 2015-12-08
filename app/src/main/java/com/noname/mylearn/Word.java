@@ -6,6 +6,7 @@ import android.os.Parcelable;
 public class Word implements Parcelable {
     private String word;
     private String translation;
+    private long id = -1;
 
     public Word() {
 
@@ -27,6 +28,14 @@ public class Word implements Parcelable {
         this.translation = string;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getId() {
+        return id;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -39,6 +48,7 @@ public class Word implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(word);
         dest.writeString(translation);
+        dest.writeLong(id);
     }
 
     // распаковываем объект из Parcel
@@ -56,5 +66,6 @@ public class Word implements Parcelable {
     private Word(Parcel parcel) {
         word = parcel.readString();
         translation = parcel.readString();
+        id = parcel.readInt();
     }
 }

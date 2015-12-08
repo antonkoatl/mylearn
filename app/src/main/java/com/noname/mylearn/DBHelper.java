@@ -134,7 +134,7 @@ public class DBHelper extends SQLiteOpenHelper {
 			if(cursor_chk){
 	        	Dictionary dict = new Dictionary();
                 dict.setName( cursor.getString( cursor.getColumnIndex(dColName) ) );
-                dict.setId( cursor.getInt(cursor.getColumnIndex(dColId)) );
+                dict.setId( cursor.getLong(cursor.getColumnIndex(dColId)) );
                 dict.setWordsCount( cursor.getInt(cursor.getColumnIndex(dWordsCount)) );
 
 	        	result.add(dict);
@@ -164,6 +164,7 @@ public class DBHelper extends SQLiteOpenHelper {
         for (int i = 0; i < count; i++) {
             if(cursor_chk){
                 Word word = new Word();
+                word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
                 word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
                 word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
 
@@ -189,12 +190,26 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if(cursor.moveToFirst()){
             word = new Word();
+            word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
             word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
             word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
         }
         cursor.close();
 
         return word;
+    }
+
+    public void updateWordById(Word word, long dict_id){
+        String table_name = getWordsTableName(dict_id);
+        SQLiteDatabase db = getWritableDatabase();
+        String selection = wColId + "=?";
+        String sel_args[] = {String.valueOf(word.getId())};
+
+        ContentValues cv = new ContentValues();
+        cv.put(wColWord, word.getWord());
+        cv.put(wColTranslation, word.getTranslationData());
+
+        db.update(table_name, cv, selection, sel_args);
     }
 
 }

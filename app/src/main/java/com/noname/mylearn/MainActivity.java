@@ -62,7 +62,7 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
                 break;
             case R.id.button_editDict:
                 Intent intent = new Intent(this, EditDict.class);
-                intent.putExtra("idDict", currentDict.getId());
+                intent.putExtra(EditDict.DICT, currentDict.getId());
                 startActivity(intent);
                 break;
             default:

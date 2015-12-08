@@ -16,7 +16,17 @@ public class AddWord extends ActionBarActivity {
 
     // Слово для редактирования
     public static final String WORD = "word";
+
+
+    // БД
+    DBHelper dbHelper;
+
+    // Данные о слове
     Word word;
+    long word_id;
+    long dict_id;
+
+    // Объекты для работы с интерфейсом
     EditText EditWord;
     EditText EditTranslation;
 
@@ -28,42 +38,42 @@ public class AddWord extends ActionBarActivity {
         // получаем Intent, который вызывал это Activity
         Intent intent = getIntent();
 
-        // получаем действие
+        // получаем данные
         action = intent.getIntExtra(ACTION, 0);
+        word_id = intent.getLongExtra(WORD, -1);
+        dict_id = intent.getLongExtra(EditDict.DICT, -1);
 
         // находим поля ввода
         EditWord = (EditText) findViewById(R.id.editText);
         EditTranslation = (EditText) findViewById(R.id.editText2);
+
+        // получаем объект для работы с бд
+        dbHelper = DBHelper.getInstance(this);
 
         // получаем слово для редактирования
         if (action == ADD_WORD) {
             word = new Word();
         }
         if (action == EDIT_WORD) {
-            word = intent.getParcelableExtra(WORD);
+            word = dbHelper.getWordById(word_id, dict_id);
+            EditWord.setText(word.getWord());
+            EditTranslation.setText(word.getTranslationData());
         }
     }
 
-    public void SaveOnClick(View v){
-        Intent intent_result = new Intent();
-        // извлекаем id текущего словаря
-        long idDict = getIntent().getLongExtra("idDict", 0);
-        DBHelper dbHelper = DBHelper.getInstance(this.getApplicationContext());
-
+    public void saveOnClick(View v){
         if (action == ADD_WORD) {
-            setResult(EditDict.RESULT_ADDED, intent_result);
+            setResult(EditDict.RESULT_ADDED, null);
             word.setWord(EditWord.getText().toString());
             word.setTranslationFromData(EditTranslation.getText().toString());
-
-            // записываем слово в базу данных
-            dbHelper.insertWord(idDict, word);
-
+            dbHelper.insertWord(dict_id, word);
         }
         if (action == EDIT_WORD) {
-            setResult(EditDict.RESULT_EDITED, intent_result);
+            setResult(EditDict.RESULT_EDITED, null);
+            word.setWord(EditWord.getText().toString());
+            word.setTranslationFromData(EditTranslation.getText().toString());
+            dbHelper.updateWordById(word, dict_id);
         }
-
-        intent_result.putExtra("word", word); // Возвращаем созданное/отредактированное слово
         finish();
     }
 }

@@ -27,9 +27,8 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
 
         sPref = getPreferences(MODE_PRIVATE);
         Long idDict = sPref.getLong(SAVED_ID_DICT, -1);
-        currentDict = new Dictionary();
         if(idDict != -1){
-            currentDict.setId(idDict);
+            selectedDict( DBHelper.getInstance(this).getDictById(idDict) );
         }
 
         dlg1 = new DictDialog();

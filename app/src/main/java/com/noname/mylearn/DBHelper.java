@@ -107,7 +107,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
         String where = "_id = " + Long.toString(dict_id);
 
-        int wCount = db.query(dictTable, new String[]{"words_count"}, where, null, null, null, null).getColumnIndex(dWordsCount);
+        Cursor cursor = db.query(dictTable, new String[]{"words_count"}, where, null, null, null, null);
+
+        // Если словарь не найден по ид
+        if(!cursor.moveToFirst()){return;}
+
+        int wCount = cursor.getInt( cursor.getColumnIndex(dWordsCount) );
         wCount = wCount + delta;
 
         ContentValues cv = new ContentValues();
@@ -133,9 +138,9 @@ public class DBHelper extends SQLiteOpenHelper {
 		for (int i = 0; i < count; i++) {
 			if(cursor_chk){
 	        	Dictionary dict = new Dictionary();
-                dict.setName( cursor.getString( cursor.getColumnIndex(dColName) ) );
-                dict.setId( cursor.getLong(cursor.getColumnIndex(dColId)) );
-                dict.setWordsCount( cursor.getInt(cursor.getColumnIndex(dWordsCount)) );
+                dict.setId(cursor.getLong(cursor.getColumnIndex(dColId)));
+                dict.setName(cursor.getString(cursor.getColumnIndex(dColName)));
+                dict.setWordsCount(cursor.getInt(cursor.getColumnIndex(dWordsCount)));
 
 	        	result.add(dict);
 	        	cursor_chk = cursor.moveToNext();
@@ -176,6 +181,26 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.close();
 
         return result;
+    }
+
+    public Dictionary getDictById(long dict_id){
+        Dictionary dict = null;
+        SQLiteDatabase db = getReadableDatabase();
+
+        String selection = dColId + "=?";
+        String sel_args[] = {String.valueOf(dict_id)};
+
+        Cursor cursor = db.query(dictTable, null, selection, sel_args, null, null, null);
+
+        if(cursor.moveToFirst()){
+            dict = new Dictionary();
+            dict.setId(cursor.getLong(cursor.getColumnIndex(dColId)));
+            dict.setName(cursor.getString(cursor.getColumnIndex(dColName)));
+            dict.setWordsCount(cursor.getInt(cursor.getColumnIndex(dWordsCount)));
+        }
+        cursor.close();
+
+        return dict;
     }
 
     public Word getWordById(long word_id, long dict_id){

@@ -1,6 +1,8 @@
 package com.noname.mylearn;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
@@ -8,15 +10,27 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements DictDialog.NoticeDialogListener {
     DialogFragment dlg1;
     Dictionary currentDict;
 
+    //public static final String APP_PREFERENCES = "settings";
+    SharedPreferences sPref;
+    final String SAVED_ID_DICT = "saved_id";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sPref = getPreferences(MODE_PRIVATE);
+        Long idDict = sPref.getLong(SAVED_ID_DICT, -1);
+        currentDict = new Dictionary();
+        if(idDict != -1){
+            currentDict.setId(idDict);
+        }
 
         dlg1 = new DictDialog();
     }
@@ -61,9 +75,15 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
                 dlg1.show(getSupportFragmentManager(), "dlg1");
                 break;
             case R.id.button_editDict:
-                Intent intent = new Intent(this, EditDict.class);
-                intent.putExtra(EditDict.DICT, currentDict.getId());
-                startActivity(intent);
+                if(currentDict.getId() > 0) {
+                    Intent intent = new Intent(this, EditDict.class);
+                    intent.putExtra(EditDict.DICT, currentDict.getId());
+                    startActivity(intent);
+                }
+                else {
+                    Toast toast = Toast.makeText(getApplicationContext(), "Выберите словарь же!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
                 break;
             default:
                 break;
@@ -73,6 +93,12 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
     @Override
     public void selectedDict(Dictionary dict) {
         currentDict = dict;
+
+        sPref = getPreferences(MODE_PRIVATE);
+        Editor editor = sPref.edit();
+        editor.putLong(SAVED_ID_DICT, currentDict.getId());
+        editor.apply();
+
         TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
         textLabel_wordsCount.setText("Количество слов: " + dict.getWordsCount());
     }

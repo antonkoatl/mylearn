@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -26,6 +28,7 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
     //ArrayAdapter<String> adapter;
     SimpleCursorAdapter scAdapter;
     long idDict;
+    long idWord;
 
 
 
@@ -72,6 +75,8 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
 
         // определяем адаптер
         scAdapter = new SimpleCursorAdapter(this, R.layout.list_item, null, from, to, 0);
+        // указываем адаптеру свой биндер
+        scAdapter.setViewBinder(new MyViewBinder());
         //adapter = new ArrayAdapter<String>(this, R.layout.list_item, R.id.TextViewWord, wordString);
         WordList.setAdapter(scAdapter);
         WordList.setOnItemClickListener(onItemClickListener);
@@ -94,12 +99,15 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
     AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            // Вызываем активити для редактирования слова
+            // вызываем активити для редактирования слова
             Intent intent = new Intent(EditDict.this, AddWord.class);
             intent.putExtra(AddWord.ACTION, AddWord.EDIT_WORD);
-            // TODO: получить id слова
-            //intent.putExtra(AddWord.WORD, words.get(position).getId());
+            // получаем id слова
+            TextView c = (TextView) view.findViewById(R.id.TextViewWord);
+            idWord = (long)c.getTag();
+
             intent.putExtra(DICT, idDict);
+            intent.putExtra(AddWord.WORD, idWord);
             startActivityForResult(intent, EditDict.REQUEST_CODE);
         }
     };
@@ -133,5 +141,19 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
     @Override
     public void onLoaderReset(android.support.v4.content.Loader<Cursor> loader) {
 
+    }
+
+    class MyViewBinder implements SimpleCursorAdapter.ViewBinder {
+
+        @Override
+        public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+            if(view.getId() == R.id.TextViewWord || view.getId() == R.id.TextViewTranslation){
+                long id = cursor.getLong(cursor.getColumnIndex("_id"));
+                view.setTag(id);
+                return false;
+            }
+            else
+                return false;
+        }
     }
 }

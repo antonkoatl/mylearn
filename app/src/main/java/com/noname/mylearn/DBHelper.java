@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.ViewDebug;
 
@@ -26,6 +27,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String wColId = "_id";
     public static final String wColWord = "word";
     public static final String wColTranslation = "translation";
+    public static final String wColStatus = "status";
+    public static final String wColLastTimestamp = "last_timestamp";
 
     // Используем этот класс как синглтон
     private static DBHelper instance;
@@ -67,7 +70,9 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table IF NOT EXISTS " + table_name + " ("
                 + wColId + " integer primary key autoincrement,"
                 + wColWord + " text unique,"
-                + wColTranslation + " text"
+                + wColTranslation + " text,"
+                + wColStatus + " integer,"
+                + wColLastTimestamp + " long"
                 + ");");
     }
 
@@ -95,6 +100,10 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues cv = new ContentValues();
         cv.put(wColWord, word.getWord());
         cv.put(wColTranslation, word.getTranslationData());
+        cv.put(wColStatus, word.getStat());
+        Time time = new Time();
+        time.setToNow();
+        cv.put(wColLastTimestamp, time.toMillis(false));
 
         db.insert(table_name, null, cv);
         // инкрементируем количество слов
@@ -112,7 +121,7 @@ public class DBHelper extends SQLiteOpenHelper {
         // Если словарь не найден по ид
         if(!cursor.moveToFirst()){return;}
 
-        int wCount = cursor.getInt( cursor.getColumnIndex(dWordsCount) );
+        int wCount = cursor.getInt(cursor.getColumnIndex(dWordsCount));
         wCount = wCount + delta;
 
         ContentValues cv = new ContentValues();
@@ -160,6 +169,46 @@ public class DBHelper extends SQLiteOpenHelper {
         String order_by = wColWord + " DESC";
 
         Cursor cursor = db.query(getWordsTableName(dict_id), null, null, null, null, null, order_by);
+
+        if(!cursor.moveToFirst()){return result;}
+
+        boolean cursor_chk = true;
+        for (int i = 0; i < offset; i++) cursor_chk = cursor.moveToNext();
+
+        for (int i = 0; i < count; i++) {
+            if(cursor_chk){
+                Word word = new Word();
+                word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
+                word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
+                word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
+                word.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
+
+                result.add(word);
+                cursor_chk = cursor.moveToNext();
+            }
+        }
+
+        cursor.close();
+
+        return result;
+    }
+
+    public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to){
+        Time time = new Time();
+        time.setToNow();
+        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, time.toMillis(false));
+    }
+
+    public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to, long timestamp){
+        List<Word> result = new ArrayList<Word>();
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        String selection = wColStatus + ">=? AND " + wColStatus + "<=? AND " + wColLastTimestamp + "<?";
+        String[] selectionArgs = new String[] { String.valueOf(stat_from), String.valueOf(stat_to), String.valueOf(timestamp)};
+        String order_by = wColLastTimestamp + " ASC";
+
+        Cursor cursor = db.query(getWordsTableName(dict_id), null, selection, selectionArgs, null, null, order_by);
 
         if(!cursor.moveToFirst()){return result;}
 
@@ -233,6 +282,10 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues cv = new ContentValues();
         cv.put(wColWord, word.getWord());
         cv.put(wColTranslation, word.getTranslationData());
+        cv.put(wColStatus, word.getStat());
+        Time time = new Time();
+        time.setToNow();
+        cv.put(wColLastTimestamp, time.toMillis(false));
 
         db.update(table_name, cv, selection, sel_args);
     }

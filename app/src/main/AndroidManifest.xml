@@ -25,6 +25,10 @@
             android:name=".AddWord"
             android:label="@string/title_activity_add_word" >
         </activity>
+        <activity
+            android:name=".LearnActivity"
+            android:label="@string/title_activity_learn_activity" >
+        </activity>
     </application>
 
 </manifest>

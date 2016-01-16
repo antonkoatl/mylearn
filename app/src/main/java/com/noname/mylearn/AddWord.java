@@ -41,7 +41,7 @@ public class AddWord extends ActionBarActivity {
         // получаем данные
         action = intent.getIntExtra(ACTION, 0);
         word_id = intent.getLongExtra(WORD, -1);
-        dict_id = intent.getLongExtra(EditDict.DICT, -1);
+        dict_id = intent.getLongExtra(MainActivity.DICT_ID, -1);
 
         // находим поля ввода
         EditWord = (EditText) findViewById(R.id.editText);

@@ -7,6 +7,7 @@ public class Word implements Parcelable {
     private String word;
     private String translation;
     private long id = -1;
+    private int stat = 0;
 
     public Word() {
 
@@ -67,5 +68,13 @@ public class Word implements Parcelable {
         word = parcel.readString();
         translation = parcel.readString();
         id = parcel.readInt();
+    }
+
+    public Integer getStat() {
+        return stat;
+    }
+
+    public void setStat(int stat) {
+        this.stat = stat;
     }
 }

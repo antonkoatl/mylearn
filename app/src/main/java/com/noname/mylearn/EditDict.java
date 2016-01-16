@@ -21,7 +21,7 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
     public static final int RESULT_ADDED = 200;
     public static final int RESULT_EDITED = 201;
 
-    public static final String DICT = "dict";
+
 
     ArrayList<String>words = new ArrayList<String>();
 
@@ -60,7 +60,7 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
         ListView WordList = (ListView) findViewById(R.id.WordList);
 
         // извлекаем id текущего словаря
-        idDict = intent.getLongExtra(DICT, -1);
+        idDict = intent.getLongExtra(MainActivity.DICT_ID, -1);
 
         // загружаем 100 слов в ArrayList
         // word = DBHelper.getInstance(getApplicationContext()).loadWords(idDict, 100,0);
@@ -91,7 +91,7 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
                 // Вызываем активити для нового слова
                 Intent intent = new Intent(this, AddWord.class);
                 intent.putExtra(AddWord.ACTION, AddWord.ADD_WORD);
-                intent.putExtra(DICT, idDict);
+                intent.putExtra(MainActivity.DICT_ID, idDict);
                 startActivityForResult(intent, EditDict.REQUEST_CODE);
         }
     }
@@ -106,7 +106,7 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
             TextView c = (TextView) view.findViewById(R.id.TextViewWord);
             idWord = (long)c.getTag();
 
-            intent.putExtra(DICT, idDict);
+            intent.putExtra(MainActivity.DICT_ID, idDict);
             intent.putExtra(AddWord.WORD, idWord);
             startActivityForResult(intent, EditDict.REQUEST_CODE);
         }

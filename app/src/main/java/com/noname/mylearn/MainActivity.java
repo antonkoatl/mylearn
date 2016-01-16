@@ -13,6 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements DictDialog.NoticeDialogListener {
+    public static final String DICT_ID = "dict_id";
+
     DialogFragment dlg1;
     Dictionary currentDict;
 
@@ -76,7 +78,7 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
             case R.id.button_editDict:
                 if(currentDict.getId() > 0) {
                     Intent intent = new Intent(this, EditDict.class);
-                    intent.putExtra(EditDict.DICT, currentDict.getId());
+                    intent.putExtra(DICT_ID, currentDict.getId());
                     startActivity(intent);
                 }
                 else {
@@ -84,6 +86,16 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
                     toast.show();
                 }
                 break;
+            case R.id.button3:
+                if(currentDict.getId() > 0) {
+                    Intent intent = new Intent(this, LearnActivity.class);
+                    intent.putExtra(DICT_ID, currentDict.getId());
+                    startActivity(intent);
+                }
+                else {
+                    Toast toast = Toast.makeText(getApplicationContext(), "Выберите словарь же!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
             default:
                 break;
         }

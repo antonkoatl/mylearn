@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.format.Time;
-import android.util.Log;
-import android.view.ViewDebug;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +55,67 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	}
 
+    private void createTestDict(SQLiteDatabase db){
+        String[][] words = {
+                {"have", "иметь"},
+                {"be", "быть"},
+                {"do", "делать"},
+                {"say", "говорить"},
+                {"go", "идти"},
+                {"get", "получать"},
+                {"know", "знать"},
+                {"see", "видеть"},
+                {"come", "приходить"},
+                {"think", "думать"},
+                {"take", "брать"},
+                {"make", "делать"},
+                {"want", "хотеть"},
+                {"tell", "говорить"},
+                {"turn", "поворачивать"},
+                {"open", "открывать"},
+                {"give", "давать"},
+                {"ask", "спрашивать"},
+                {"move", "двигать"},
+                {"stand", "стоять"},
+        };
+
+        Dictionary dict = new Dictionary();
+        dict.setName("Test");
+        dict.setWordsCount(words.length);
+
+        ContentValues cv = new ContentValues();
+        cv.put(dColName, dict.getName());
+        cv.put(dWordsCount, dict.getWordsCount());
+        long dict_id = db.insert(dictTable, null, cv);
+        createWordsTable(db, dict_id);
+
+        for(String[] w: words){
+            Word word = new Word();
+            word.setWord(w[0]);
+            word.setTranslationFromData(w[1]);
+
+            String table_name = getWordsTableName(dict_id);
+
+            cv = new ContentValues();
+            cv.put(wColWord, w[0]);
+            cv.put(wColTranslation, w[1]);
+            cv.put(wColStatus, 0);
+            Time time = new Time();
+            time.setToNow();
+            cv.put(wColLastTimestamp, time.toMillis(false));
+
+            db.insert(table_name, null, cv);
+        }
+    }
+
 	private void createTablesDb(SQLiteDatabase db){
 		db.execSQL("create table IF NOT EXISTS " + dictTable + " ("
                 + dColId + " integer primary key autoincrement,"
                 + dColName + " text,"
                 + dWordsCount + " integer"
                 + ");");
+
+        createTestDict(db);
 	}
 
     private void createWordsTable(SQLiteDatabase db, long dict_id){

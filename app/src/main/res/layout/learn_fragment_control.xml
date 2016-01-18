@@ -14,24 +14,24 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button7"/>
+        android:text="Не знаю"
+        android:id="@+id/learn_button_choice1"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button8"/>
+        android:text="Плохо"
+        android:id="@+id/learn_button_choice2"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button9"/>
+        android:text="Средне"
+        android:id="@+id/learn_button_choice3"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button10"/>
+        android:text="Отлично"
+        android:id="@+id/learn_button_choice4"/>
 </LinearLayout>

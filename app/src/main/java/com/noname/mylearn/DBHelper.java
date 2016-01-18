@@ -249,17 +249,29 @@ public class DBHelper extends SQLiteOpenHelper {
     public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to){
         Time time = new Time();
         time.setToNow();
-        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, time.toMillis(false));
+        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, time.toMillis(false), true);
+    }
+
+    public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to, boolean asc){
+        Time time = new Time();
+        time.setToNow();
+        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, time.toMillis(false), asc);
     }
 
     public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to, long timestamp){
+        Time time = new Time();
+        time.setToNow();
+        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, timestamp, true);
+    }
+
+    public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to, long timestamp, boolean asc){
         List<Word> result = new ArrayList<Word>();
 
         SQLiteDatabase db = getReadableDatabase();
 
         String selection = wColStatus + ">=? AND " + wColStatus + "<=? AND " + wColLastTimestamp + "<?";
         String[] selectionArgs = new String[] { String.valueOf(stat_from), String.valueOf(stat_to), String.valueOf(timestamp)};
-        String order_by = wColLastTimestamp + " ASC";
+        String order_by = asc ? wColLastTimestamp + " ASC" : wColLastTimestamp + " DESC";
 
         Cursor cursor = db.query(getWordsTableName(dict_id), null, selection, selectionArgs, null, null, order_by);
 
@@ -273,6 +285,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Word word = new Word();
                 word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
                 word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
+                word.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
                 word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
 
                 result.add(word);

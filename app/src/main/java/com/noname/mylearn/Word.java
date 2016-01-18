@@ -50,6 +50,7 @@ public class Word implements Parcelable {
         dest.writeString(word);
         dest.writeString(translation);
         dest.writeLong(id);
+        dest.writeInt(stat);
     }
 
     // распаковываем объект из Parcel
@@ -63,11 +64,31 @@ public class Word implements Parcelable {
         }
     };
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Word)) return false;
+
+        Word word1 = (Word) o;
+
+        if (!getWord().equals(word1.getWord())) return false;
+        return translation.equals(word1.translation);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getWord().hashCode();
+        result = 31 * result + translation.hashCode();
+        return result;
+    }
+
     // конструктор, считывающий данные из Parcel
     private Word(Parcel parcel) {
         word = parcel.readString();
         translation = parcel.readString();
-        id = parcel.readInt();
+        id = parcel.readLong();
+        stat = parcel.readInt();
     }
 
     public Integer getStat() {

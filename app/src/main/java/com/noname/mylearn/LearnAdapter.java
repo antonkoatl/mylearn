@@ -13,6 +13,7 @@ public class LearnAdapter extends FragmentPagerAdapter {
     DBHelper dbHelper;
     long dictId;
     List<Word> wordsToLearn;
+    Word current_word;
 
     public LearnAdapter(FragmentManager fm, long dictId, DBHelper dbHelper) {
         super(fm);
@@ -31,10 +32,10 @@ public class LearnAdapter extends FragmentPagerAdapter {
             makeWordsList();
         }
 
-        Word current_word = wordsToLearn.remove(0);
+        current_word = wordsToLearn.remove(0);
 
 
-        return LearnFragment.newInstance(current_word);
+        return LearnFragment.newInstance(current_word, dictId);
     }
 
     void makeWordsList(){
@@ -42,24 +43,27 @@ public class LearnAdapter extends FragmentPagerAdapter {
         Time time = new Time();
         time.setToNow();
         long time_last_week = time.toMillis(false) - 604800000;
-        List<Word> words_week = dbHelper.loadWordsForLearn(dictId, 10, 0, 9, 9, time_last_week);
+        List<Word> words_week = dbHelper.loadWordsForLearn(dictId, 3, 0, 9, 9, time_last_week);
         words.addAll(words_week);
 
         if (words.size() < 10) {
             long time_last_day = time.toMillis(false) - 86400000;
-            List<Word> words_day = dbHelper.loadWordsForLearn(dictId, 10, 0, 6, 9, time_last_day);
+            List<Word> words_day = dbHelper.loadWordsForLearn(dictId, 3, 0, 6, 9, time_last_day);
             words.addAll(words_day);
         }
 
         if (words.size() < 10) {
-            List<Word> words_now = dbHelper.loadWordsForLearn(dictId, 10, 0, 1, 5);
+            List<Word> words_now = dbHelper.loadWordsForLearn(dictId, 3, 0, 1, 5);
             words.addAll(words_now);
         }
 
         if (words.size() < 10) {
-            List<Word> words_new = dbHelper.loadWordsForLearn(dictId, 10 - words.size(), 0, 0, 0);
+            List<Word> words_new = dbHelper.loadWordsForLearn(dictId, 2, 0, 0, 0);
             words.addAll(words_new);
         }
+
+        int ind = words.indexOf(current_word);
+        if (ind != -1) words.remove(ind);
 
         Collections.shuffle(words);
         wordsToLearn = words;

@@ -40,7 +40,7 @@ public class LearnActivity extends ActionBarActivity implements LearnFragment.Le
                 public void run() {
                     mPager.setCurrentItem(mPager.getCurrentItem() + 1);
                 }
-            }, 2000);
+            }, 1200);
         } else {
             mPager.setCurrentItem(mPager.getCurrentItem() + 1);
         }
@@ -55,12 +55,13 @@ public class LearnActivity extends ActionBarActivity implements LearnFragment.Le
     @Override
     public void setDebugInfo() {
         TextView textView = (TextView) findViewById(R.id.learn_debug_info);
-        textView.setText(String.valueOf(mAdapter.last_word2.getStat()));
+        textView.setText(mAdapter.last_word2 != null ? String.valueOf(mAdapter.last_word2.getStat()) : "");
     }
 
     @Override
     public void forceWord(Word word) {
         mAdapter.forcedWord = word;
         mAdapter.notifyDataSetChanged();
+        mAdapter.wordsToLearn = null;
     }
 }

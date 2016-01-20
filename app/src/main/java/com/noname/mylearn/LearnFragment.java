@@ -22,6 +22,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
     static final int TEST = 1;
     static final int TYPE = 2;
     static final int CONTROL = 3;
+    static final int NOWORD = 4;
     int type;
 
     Word word;
@@ -65,37 +66,41 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
         word = getArguments().getParcelable(ARGUMENT_WORD);
         dictId = getArguments().getLong(ARGUMENT_DICT_ID);
 
-        switch (word.getStat()){
-            case 0:
-                type = NEW;
-                break;
-            case 1:
-                type = TEST;
-                break;
-            case 2:
-                type = TYPE;
-                break;
-            case 3:
-                type = TEST;
-                break;
-            case 4:
-                type = TYPE;
-                break;
-            case 5:
-                type = CONTROL;
-                break;
-            case 6:
-                type = TEST;
-                break;
-            case 7:
-                type = TYPE;
-                break;
-            case 8:
-                type = CONTROL;
-                break;
-            case 9:
-                type = CONTROL;
-                break;
+        if (word == null) {
+            type = NOWORD;
+        } else {
+            switch (word.getStat()) {
+                case 0:
+                    type = NEW;
+                    break;
+                case 1:
+                    type = TEST;
+                    break;
+                case 2:
+                    type = TYPE;
+                    break;
+                case 3:
+                    type = TEST;
+                    break;
+                case 4:
+                    type = TYPE;
+                    break;
+                case 5:
+                    type = CONTROL;
+                    break;
+                case 6:
+                    type = TEST;
+                    break;
+                case 7:
+                    type = TYPE;
+                    break;
+                case 8:
+                    type = CONTROL;
+                    break;
+                case 9:
+                    type = CONTROL;
+                    break;
+            }
         }
 
         dbHelper = DBHelper.getInstance(this.getActivity());
@@ -178,6 +183,11 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                 Button button8 = (Button) view.findViewById(R.id.learn_button_choice4);
                 button8.setOnClickListener(this);
                 break;
+            case NOWORD:
+                view = inflater.inflate(R.layout.learn_fragment_filler, null);
+                TextView tv_w = (TextView) view.findViewById(R.id.learn_filler_text);
+                tv_w.setText("Нет слов для изучения");
+                break;
         }
 
 
@@ -204,7 +214,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                         break;
                     case TYPE:
                         EditText editText = (EditText) ((View)v.getParent()).findViewById(R.id.learn_edit1);
-                        if (editText.getText().toString().equals(word.getWord())) {
+                        if (editText.getText().toString().toLowerCase().equals(word.getWord())) {
                             word.updateStat(Word.ST_SUCCESS);
                             v.setBackgroundColor(getResources().getColor(R.color.right));
                         } else {

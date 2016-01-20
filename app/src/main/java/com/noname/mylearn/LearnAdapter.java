@@ -44,7 +44,7 @@ public class LearnAdapter extends FragmentStatePagerAdapter {
             forcedWord = null;
         } else {
             last_word2 = last_word;
-            last_word = wordsToLearn.remove(0);
+            last_word = wordsToLearn.size() > 0 ? wordsToLearn.remove(0) : null;
         }
 
         return LearnFragment.newInstance(last_word, dictId);

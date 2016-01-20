@@ -1,8 +1,6 @@
 package com.noname.mylearn;
 
-
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -24,16 +22,18 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
     static final int TEST = 1;
     static final int TYPE = 2;
     static final int CONTROL = 3;
+    int type;
 
     Word word;
     long dictId;
-    int type;
     DBHelper dbHelper;
 
-    // Интерфейс для управления фрагментами
+    // Интерфейс для работы с фрагментами
     public interface LearnFragmentListener {
-        void nextPage();
+        void nextPage(boolean delayed);
         List<Word> getCurrentWords();
+        void setDebugInfo();
+        void forceWord(Word word);
     }
 
     private LearnFragmentListener mListener;
@@ -55,9 +55,6 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
         Bundle arguments = new Bundle();
         arguments.putParcelable(ARGUMENT_WORD, word);
         arguments.putLong(ARGUMENT_DICT_ID, dict_id);
-
-
-
         pageFragment.setArguments(arguments);
         return pageFragment;
     }
@@ -102,6 +99,8 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
         }
 
         dbHelper = DBHelper.getInstance(this.getActivity());
+
+        mListener.setDebugInfo();
     }
 
     @Override
@@ -199,19 +198,22 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
             case R.id.learn_button_next:
                 switch (type) {
                     case NEW:
-                        word.setStat(word.getStat() + 1);
+                        word.updateStat(Word.ST_SUCCESS);
                         dbHelper.updateWordById(word, dictId);
-                        mListener.nextPage();
+                        mListener.nextPage(false);
                         break;
                     case TYPE:
                         EditText editText = (EditText) ((View)v.getParent()).findViewById(R.id.learn_edit1);
                         if (editText.getText().toString().equals(word.getWord())) {
-                            word.setStat(word.getStat() + 1);
+                            word.updateStat(Word.ST_SUCCESS);
+                            v.setBackgroundColor(getResources().getColor(R.color.right));
                         } else {
-                            word.setStat(0);
+                            word.updateStat(Word.ST_FAIL);
+                            mListener.forceWord(word);
+                            v.setBackgroundColor(getResources().getColor(R.color.wrong));
                         }
                         dbHelper.updateWordById(word, dictId);
-                        mListener.nextPage();
+                        mListener.nextPage(true);
                         break;
                 }
                 break;
@@ -222,30 +224,34 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                 switch (type) {
                     case TEST:
                         if (v.getTag() == word.getId()) {
-                            word.setStat(word.getStat() + 1);
+                            word.updateStat(Word.ST_SUCCESS);
+                            v.setBackgroundColor(getResources().getColor(R.color.right));
                         } else {
-                            word.setStat(0);
+                            word.updateStat(Word.ST_FAIL);
+                            v.setBackgroundColor(getResources().getColor(R.color.wrong));
+                            mListener.forceWord(word);
                         }
                         dbHelper.updateWordById(word, dictId);
-                        mListener.nextPage();
+                        mListener.nextPage(true);
                         break;
                     case CONTROL:
                         switch (v.getId()) {
                             case R.id.learn_button_choice1:
-                                word.setStat(0);
+                                word.updateStat(Word.ST_FAIL);
+                                mListener.forceWord(word);
                                 break;
                             case R.id.learn_button_choice2:
-                                word.setStat(1);
+                                word.updateStat(Word.ST_BAD);
                                 break;
                             case R.id.learn_button_choice3:
-                                word.setStat(word.getStat() - 2);
+                                word.updateStat(Word.ST_GOOD);
                                 break;
                             case R.id.learn_button_choice4:
-                                word.setStat(word.getStat() + 1);
+                                word.updateStat(Word.ST_SUCCESS);
                                 break;
                         }
                         dbHelper.updateWordById(word, dictId);
-                        mListener.nextPage();
+                        mListener.nextPage(false);
                         break;
                 }
         }

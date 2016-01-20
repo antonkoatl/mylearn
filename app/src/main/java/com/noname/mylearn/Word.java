@@ -7,10 +7,35 @@ public class Word implements Parcelable {
     private String word;
     private String translation;
     private long id = -1;
+
+    // Статус слова при изучении
+    public static final int S_NEW = 0;
+    public static final int S_TEST1 = 1;
+    public static final int S_TYPE1 = 2;
+    public static final int S_TEST2 = 3;
+    public static final int S_TYPE2 = 4;
+    public static final int S_CNTRL = 5;
+    public static final int S_SM_TEST1 = 6;
+    public static final int S_SM_TYPE1 = 7;
+    public static final int S_SM_CNTRL = 8;
+    public static final int S_LM_CNTRL = 9;
+    public static final int S_LM_LEARNED = 10;
+
+    // Изменение статуста
+    public static final int ST_SUCCESS = 1;
+    public static final int ST_FAIL = 2;
+    public static final int ST_GOOD = 3;
+    public static final int ST_BAD = 4;
+
     private int stat = 0;
 
     public Word() {
 
+    }
+
+    public Word(String word, String translation) {
+        this.word = word;
+        this.translation = translation;
     }
 
     public String getWord() {
@@ -41,8 +66,6 @@ public class Word implements Parcelable {
     public int describeContents() {
         return 0;
     }
-
-
 
     // упаковываем объект в Parcel
     @Override
@@ -91,11 +114,36 @@ public class Word implements Parcelable {
         stat = parcel.readInt();
     }
 
-    public Integer getStat() {
+    public int getStat() {
         return stat;
     }
 
     public void setStat(int stat) {
         this.stat = stat;
+    }
+
+    public void updateStat(int type){
+        switch (type) {
+            case ST_SUCCESS:
+                setStat(getStat() + 1);
+                break;
+            case ST_FAIL:
+                setStat(S_NEW);
+                break;
+            case ST_GOOD:
+                switch (getStat()) {
+                    case S_CNTRL:
+                        setStat(S_TEST2);
+                        break;
+                    case S_SM_CNTRL:
+                    case S_LM_CNTRL:
+                        setStat(S_SM_TEST1);
+                        break;
+                }
+                break;
+            case ST_BAD:
+                setStat(S_TEST1);
+                break;
+        }
     }
 }

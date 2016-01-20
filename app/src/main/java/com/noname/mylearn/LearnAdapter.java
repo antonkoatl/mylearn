@@ -2,18 +2,25 @@ package com.noname.mylearn;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.text.format.Time;
+import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class LearnAdapter extends FragmentPagerAdapter {
+public class LearnAdapter extends FragmentStatePagerAdapter {
+    private static final int MILLIS_IN_WEEK = (int) (604800000*0.95);
+    private static final int MILLIS_IN_DAY = (int) (86400000*0.8);
+
     DBHelper dbHelper;
     long dictId;
     List<Word> wordsToLearn;
-    Word current_word;
+    Word last_word; // следующее слово
+    Word last_word2; // текущее слово
+    Word forcedWord;
 
     public LearnAdapter(FragmentManager fm, long dictId, DBHelper dbHelper) {
         super(fm);
@@ -32,22 +39,29 @@ public class LearnAdapter extends FragmentPagerAdapter {
             makeWordsList();
         }
 
-        current_word = wordsToLearn.remove(0);
+        if (forcedWord != null) {
+            last_word = forcedWord;
+            forcedWord = null;
+        } else {
+            last_word2 = last_word;
+            last_word = wordsToLearn.remove(0);
+        }
 
-
-        return LearnFragment.newInstance(current_word, dictId);
+        return LearnFragment.newInstance(last_word, dictId);
     }
 
+    // Функция составления списка слов на изучение
     void makeWordsList(){
         List<Word> words = new ArrayList<>();
         Time time = new Time();
         time.setToNow();
-        long time_last_week = time.toMillis(false) - 604800000;
+
+        long time_last_week = time.toMillis(false) - MILLIS_IN_WEEK;
         List<Word> words_week = dbHelper.loadWordsForLearn(dictId, 3, 0, 9, 9, time_last_week);
         words.addAll(words_week);
 
         if (words.size() < 10) {
-            long time_last_day = time.toMillis(false) - 86400000;
+            long time_last_day = time.toMillis(false) - MILLIS_IN_DAY;
             List<Word> words_day = dbHelper.loadWordsForLearn(dictId, 3, 0, 6, 9, time_last_day);
             words.addAll(words_day);
         }
@@ -62,10 +76,31 @@ public class LearnAdapter extends FragmentPagerAdapter {
             words.addAll(words_new);
         }
 
-        int ind = words.indexOf(current_word);
+        // Не добавлять последнее слово - изменится статус
+        int ind = words.indexOf(last_word);
         if (ind != -1) words.remove(ind);
 
         Collections.shuffle(words);
         wordsToLearn = words;
     }
+
+    @Override
+    public int getItemPosition(Object object)
+    {
+        if(forcedWord != null && ((LearnFragment) object).word.equals(last_word))
+            return POSITION_NONE;
+
+        return POSITION_UNCHANGED;
+    }
+
+    /*
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        super.destroyItem(container, position, object);
+        FragmentManager manager = ((Fragment) object).getFragmentManager();
+        FragmentTransaction trans = manager.beginTransaction();
+        trans.remove((Fragment) object);
+        trans.commit();
+    }*/
+
 }

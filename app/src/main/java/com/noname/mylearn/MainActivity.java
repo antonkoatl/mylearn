@@ -12,13 +12,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity {
-    public static final int REQUEST_CODE_SELECTED = 300;
-    public static final int REQUEST_CODE_WORD_ADDED = 301;
+public class MainActivity extends ActionBarActivity implements DictDialog.NoticeDialogListener {
     public static final String DICT_ID = "dict_id";
-    public static final String DICT_WORDS_COUNT = "dict_words_count";
 
-    //DialogFragment dlg1;
+    DialogFragment dlg1;
     Dictionary currentDict;
 
     //public static final String APP_PREFERENCES = "settings";
@@ -35,15 +32,8 @@ public class MainActivity extends ActionBarActivity {
         if(idDict != -1){
             selectedDict( DBHelper.getInstance(this).getDictById(idDict) );
         }
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        /*currentDict.setWordsCount(getIntent().getIntExtra(DICT_WORDS_COUNT, -1 ));
-        TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
-        textLabel_wordsCount.setText("Количество слов:! " + currentDict.getWordsCount());*/
+        dlg1 = new DictDialog();
     }
 
     /**@Override
@@ -83,16 +73,13 @@ public class MainActivity extends ActionBarActivity {
     public void buttonClick(View v) {
         switch (v.getId()) {
             case R.id.button_dict:
-                Intent intent = new Intent(this, DictDialog.class);
-                startActivityForResult(intent, REQUEST_CODE_SELECTED);
+                dlg1.show(getSupportFragmentManager(), "dlg1");
                 break;
             case R.id.button_editDict:
-                if(currentDict != null) {
-                    intent = new Intent(this, EditDict.class);
+                if(currentDict.getId() > 0) {
+                    Intent intent = new Intent(this, EditDict.class);
                     intent.putExtra(DICT_ID, currentDict.getId());
-                    intent.putExtra(DICT_WORDS_COUNT, currentDict.getWordsCount());
-
-                    startActivityForResult(intent, REQUEST_CODE_WORD_ADDED);
+                    startActivity(intent);
                 }
                 else {
                     Toast toast = Toast.makeText(getApplicationContext(), "Выберите словарь же!", Toast.LENGTH_SHORT);
@@ -100,8 +87,8 @@ public class MainActivity extends ActionBarActivity {
                 }
                 break;
             case R.id.button3:
-                if(currentDict != null) {
-                    intent = new Intent(this, LearnActivity.class);
+                if(currentDict.getId() > 0) {
+                    Intent intent = new Intent(this, LearnActivity.class);
                     intent.putExtra(DICT_ID, currentDict.getId());
                     startActivity(intent);
                 }
@@ -113,23 +100,8 @@ public class MainActivity extends ActionBarActivity {
                 break;
         }
     }
-    // Получаем результаты вызванных активити
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK){
-            switch(requestCode) {
-                case REQUEST_CODE_SELECTED:
-                    Long idDict = data.getLongExtra(DICT_ID, 0);
-                    selectedDict(DBHelper.getInstance(this).getDictById(idDict));
-                    break;
-                case REQUEST_CODE_WORD_ADDED:
-                    currentDict.setWordsCount(data.getIntExtra(DICT_WORDS_COUNT, -1));
-                    TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
-                    textLabel_wordsCount.setText("Количество слов: " + currentDict.getWordsCount());
-            }
-        }
-    }
     public void selectedDict(Dictionary dict) {
         currentDict = dict;
 
@@ -138,8 +110,6 @@ public class MainActivity extends ActionBarActivity {
         editor.putLong(SAVED_ID_DICT, currentDict.getId());
         editor.apply();
 
-        TextView textLabel_currentDict = (TextView) findViewById(R.id.currentDictTextView);
-        textLabel_currentDict.setText("Текущий словарь: " + dict.getName());
         TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
         textLabel_wordsCount.setText("Количество слов: " + dict.getWordsCount());
     }

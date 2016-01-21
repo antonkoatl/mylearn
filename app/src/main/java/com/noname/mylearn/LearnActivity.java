@@ -2,11 +2,17 @@ package com.noname.mylearn;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.widget.TextView;
 
-public class LearnActivity extends ActionBarActivity {
-    ViewPager mPager;
+import java.util.List;
+
+public class LearnActivity extends ActionBarActivity implements LearnFragment.LearnFragmentListener {
+    LockableViewPager mPager;
+    LearnAdapter mAdapter;
+    private final Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +25,48 @@ public class LearnActivity extends ActionBarActivity {
         // извлекаем id текущего словаря
         long idDict = intent.getLongExtra(MainActivity.DICT_ID, -1);
 
-        mPager = (ViewPager) findViewById(R.id.pager);
-        mPager.setAdapter(new LearnAdapter(getSupportFragmentManager(), idDict, DBHelper.getInstance(this)));
+        mAdapter = new LearnAdapter(getSupportFragmentManager(), idDict, DBHelper.getInstance(this));
+
+        mPager = (LockableViewPager) findViewById(R.id.pager);
+        mPager.setSwipeLocked(true);
+        mPager.setAdapter(mAdapter);
     }
+
+
+    @Override
+    public void nextPage(boolean delayed) {
+        if (mAdapter.last_word == null) {
+            mAdapter.notifyDataSetChanged();
+        }
+        if (delayed) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mPager.setCurrentItem(mPager.getCurrentItem() + 1);
+                }
+            }, 1200);
+        } else {
+            mPager.setCurrentItem(mPager.getCurrentItem() + 1);
+        }
+
+    }
+
+    @Override
+    public List<Word> getCurrentWords() {
+        return mAdapter.wordsToLearn;
+    }
+
+    @Override
+    public void setDebugInfo() {
+        TextView textView = (TextView) findViewById(R.id.learn_debug_info);
+        if(textView != null)textView.setText((mAdapter != null && mAdapter.last_word2 != null) ? String.valueOf(mAdapter.last_word2.getStat()) : "");
+    }
+
+    @Override
+    public void forceWord(Word word) {
+        mAdapter.forcedWord = word;
+        mAdapter.notifyDataSetChanged();
+        mAdapter.wordsToLearn = null;
+    }
+
 }

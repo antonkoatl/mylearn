@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.format.Time;
-import android.util.Log;
-import android.view.ViewDebug;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +55,67 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	}
 
+    private void createTestDict(SQLiteDatabase db){
+        String[][] words = {
+                {"have", "иметь"},
+                {"be", "быть"},
+                {"do", "делать"},
+                {"say", "говорить"},
+                {"go", "идти"},
+                {"get", "получать"},
+                {"know", "знать"},
+                {"see", "видеть"},
+                {"come", "приходить"},
+                {"think", "думать"},
+                {"take", "брать"},
+                {"make", "делать"},
+                {"want", "хотеть"},
+                {"tell", "говорить"},
+                {"turn", "поворачивать"},
+                {"open", "открывать"},
+                {"give", "давать"},
+                {"ask", "спрашивать"},
+                {"move", "двигать"},
+                {"stand", "стоять"},
+        };
+
+        Dictionary dict = new Dictionary();
+        dict.setName("Test");
+        dict.setWordsCount(words.length);
+
+        ContentValues cv = new ContentValues();
+        cv.put(dColName, dict.getName());
+        cv.put(dWordsCount, dict.getWordsCount());
+        long dict_id = db.insert(dictTable, null, cv);
+        createWordsTable(db, dict_id);
+
+        for(String[] w: words){
+            Word word = new Word();
+            word.setWord(w[0]);
+            word.setTranslationFromData(w[1]);
+
+            String table_name = getWordsTableName(dict_id);
+
+            cv = new ContentValues();
+            cv.put(wColWord, w[0]);
+            cv.put(wColTranslation, w[1]);
+            cv.put(wColStatus, 0);
+            Time time = new Time();
+            time.setToNow();
+            cv.put(wColLastTimestamp, time.toMillis(false));
+
+            db.insert(table_name, null, cv);
+        }
+    }
+
 	private void createTablesDb(SQLiteDatabase db){
 		db.execSQL("create table IF NOT EXISTS " + dictTable + " ("
                 + dColId + " integer primary key autoincrement,"
                 + dColName + " text,"
                 + dWordsCount + " integer"
                 + ");");
+
+        createTestDict(db);
 	}
 
     private void createWordsTable(SQLiteDatabase db, long dict_id){
@@ -196,17 +249,29 @@ public class DBHelper extends SQLiteOpenHelper {
     public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to){
         Time time = new Time();
         time.setToNow();
-        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, time.toMillis(false));
+        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, time.toMillis(false), true);
+    }
+
+    public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to, boolean asc){
+        Time time = new Time();
+        time.setToNow();
+        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, time.toMillis(false), asc);
     }
 
     public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to, long timestamp){
+        Time time = new Time();
+        time.setToNow();
+        return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, timestamp, true);
+    }
+
+    public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to, long timestamp, boolean asc){
         List<Word> result = new ArrayList<Word>();
 
         SQLiteDatabase db = getReadableDatabase();
 
-        String selection = wColStatus + ">=? AND " + wColStatus + "<=? AND " + wColLastTimestamp + "<?";
+        String selection = wColStatus + ">=? AND " + wColStatus + "<=? AND " + wColLastTimestamp + "<=?";
         String[] selectionArgs = new String[] { String.valueOf(stat_from), String.valueOf(stat_to), String.valueOf(timestamp)};
-        String order_by = wColLastTimestamp + " ASC";
+        String order_by = asc ? wColLastTimestamp + " ASC" : wColLastTimestamp + " DESC";
 
         Cursor cursor = db.query(getWordsTableName(dict_id), null, selection, selectionArgs, null, null, order_by);
 
@@ -220,6 +285,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Word word = new Word();
                 word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
                 word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
+                word.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
                 word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
 
                 result.add(word);
@@ -290,4 +356,62 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update(table_name, cv, selection, sel_args);
     }
 
+    public void deleteWordById(Word word, long dict_id) {
+        String table_name = getWordsTableName(dict_id);
+        SQLiteDatabase db = getWritableDatabase();
+        String whereClause = wColId + "=?";
+        String[] whereArgs = new String[] { String.valueOf(word.getId()) };
+
+        db.delete(table_name, whereClause, whereArgs);
+
+        changeWordsCount(dict_id, -1);
+    }
+
+    public Word chkWord(String word, String translation, long dict_id) {
+        Word result = null;
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        String selection = wColWord + "=? AND " + wColTranslation + "=?";
+        String[] selectionArgs = new String[] { word, translation};
+
+        Cursor cursor = db.query(getWordsTableName(dict_id), null, selection, selectionArgs, null, null, null);
+
+        if(cursor.moveToFirst()) {
+            result = new Word();
+            result.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
+            result.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
+            result.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
+            result.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
+        }
+        cursor.close();
+
+        return result;
+    }
+
+    public int countWords(long dict_id, int stat_from, int stat_to) {
+        Time time = new Time();
+        time.setToNow();
+        return countWords(dict_id, stat_from, stat_to, time.toMillis(false));
+    }
+
+    public int countWords(long dict_id, int stat_from, int stat_to, long timestamp) {
+        int result = 0;
+        SQLiteDatabase db = getReadableDatabase();
+
+        String selection = wColStatus + ">=? AND " + wColStatus + "<=? AND " + wColLastTimestamp + "<=?";
+        String[] selectionArgs = new String[] { String.valueOf(stat_from), String.valueOf(stat_to), String.valueOf(timestamp)};
+
+        Cursor cursor = db.query(getWordsTableName(dict_id), null, selection, selectionArgs, null, null, null);
+
+        if(cursor.moveToFirst()){
+            result = cursor.getCount();
+        } else {
+            result = 0;
+        }
+
+        cursor.close();
+
+        return result;
+    }
 }

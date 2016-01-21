@@ -9,18 +9,22 @@
         android:layout_height="wrap_content"
         android:text="New Text"
         android:id="@+id/learn_translation"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:textSize="30dp"
+        android:textStyle="bold"/>
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText3"
-        android:layout_gravity="center_horizontal"/>
+        android:id="@+id/learn_edit1"
+        android:layout_gravity="center_horizontal"
+        android:textSize="25dp"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Button"
-        android:id="@+id/button6"
-        android:layout_gravity="center_horizontal"/>
+        android:text="Next"
+        android:id="@+id/learn_button_next"
+        android:layout_gravity="center_horizontal"
+        android:textSize="25dp"/>
 </LinearLayout>

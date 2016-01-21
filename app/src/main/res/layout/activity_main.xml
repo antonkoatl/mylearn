@@ -15,12 +15,9 @@
         android:layout_height="wrap_content"
         android:text="Словарь"
         android:id="@+id/button_dict"
-        android:onClick="buttonClick"
-        android:layout_below="@+id/wordsCountTextView"
-        android:layout_alignLeft="@+id/button_editDict"
-        android:layout_alignStart="@+id/button_editDict"
-        android:layout_alignRight="@+id/button_editDict"
-        android:layout_alignEnd="@+id/button_editDict" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="buttonClick"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -28,39 +25,23 @@
         android:text="Редактировать"
         android:id="@+id/button_editDict"
         android:onClick="buttonClick"
-        android:layout_below="@+id/button_dict"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/wordsCountTextView"
+        android:layout_centerHorizontal="true"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Учить"
         android:id="@+id/button3"
-        android:onClick="buttonClick"
         android:layout_below="@+id/button_editDict"
-        android:layout_alignRight="@+id/button_editDict"
-        android:layout_alignEnd="@+id/button_editDict"
-        android:layout_alignLeft="@+id/button_editDict"
-        android:layout_alignStart="@+id/button_editDict" />
+        android:layout_centerHorizontal="true"
+        android:onClick="buttonClick"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Количество слов: -"
         android:id="@+id/wordsCountTextView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="69dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Текущий словарь: не выбран"
-        android:id="@+id/currentDictTextView"
-        android:layout_alignBottom="@+id/wordsCountTextView"
-        android:layout_marginBottom="27dp"
-        android:layout_alignLeft="@+id/wordsCountTextView"
-        android:layout_alignStart="@+id/wordsCountTextView"
-        android:layout_alignRight="@+id/wordsCountTextView"
-        android:layout_alignEnd="@+id/wordsCountTextView" />
+        android:layout_below="@+id/button_dict"
+        android:layout_centerHorizontal="true"/>
 </RelativeLayout>

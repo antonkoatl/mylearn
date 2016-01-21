@@ -6,6 +6,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
+import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,18 +23,24 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
     SharedPreferences sPref;
     final String SAVED_ID_DICT = "saved_id";
 
+    DBHelper dbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dbHelper = DBHelper.getInstance(this);
+
         sPref = getPreferences(MODE_PRIVATE);
         Long idDict = sPref.getLong(SAVED_ID_DICT, -1);
         if(idDict != -1){
-            selectedDict( DBHelper.getInstance(this).getDictById(idDict) );
+            selectedDict( dbHelper.getDictById(idDict) );
         }
 
         dlg1 = new DictDialog();
+
+
     }
 
     /**@Override
@@ -110,7 +117,40 @@ public class MainActivity extends ActionBarActivity implements DictDialog.Notice
         editor.putLong(SAVED_ID_DICT, currentDict.getId());
         editor.apply();
 
+        updateDictInfo();
+
+    }
+
+    void updateDictInfo(){
+        currentDict = dbHelper.getDictById(currentDict.getId());
+
+        Time time = new Time();
+        time.setToNow();
+        long time_last_day = time.toMillis(false) - LearnAdapter.MILLIS_IN_DAY;
+        long time_last_week = time.toMillis(false) - LearnAdapter.MILLIS_IN_WEEK;
+
         TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
-        textLabel_wordsCount.setText("Количество слов: " + dict.getWordsCount());
+        textLabel_wordsCount.setText("Количество слов: " + dbHelper.countWords(currentDict.getId(), 10, 100) + "/" + currentDict.getWordsCount());
+
+        TextView textLabel_wordsCount2 = (TextView) findViewById(R.id.main_words_today);
+        int today = dbHelper.countWords(currentDict.getId(), 1, 5);
+        today += dbHelper.countWords(currentDict.getId(), 6, 8, time_last_day);
+        today += dbHelper.countWords(currentDict.getId(), 9, 9, time_last_week);
+        textLabel_wordsCount2.setText("Учить сегодня: " + String.valueOf(today));
+
+        TextView textLabel_wordsCount3 = (TextView) findViewById(R.id.main_words_tomorrow);
+        int tomorrow = dbHelper.countWords(currentDict.getId(), 6, 8);
+        tomorrow += dbHelper.countWords(currentDict.getId(), 9, 9, (long) (time_last_week*0.857));
+        textLabel_wordsCount3.setText("Учить завтра: " + String.valueOf(tomorrow));
+
+        TextView textLabel_wordsCount4 = (TextView) findViewById(R.id.main_words_new);
+        int neww = dbHelper.countWords(currentDict.getId(), 0, 0);
+        textLabel_wordsCount4.setText("Новых слов: " + String.valueOf(neww));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateDictInfo();
     }
 }

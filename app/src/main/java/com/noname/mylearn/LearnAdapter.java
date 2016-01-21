@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class LearnAdapter extends FragmentStatePagerAdapter {
-    private static final int MILLIS_IN_WEEK = (int) (604800000*0.95);
-    private static final int MILLIS_IN_DAY = (int) (86400000*0.8);
+    public static final int MILLIS_IN_WEEK = (int) (604800000*0.95);
+    public static final int MILLIS_IN_DAY = (int) (86400000*0.8);
 
     DBHelper dbHelper;
     long dictId;

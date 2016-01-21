@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -144,6 +145,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                     test_variants = new ArrayList<>();
                     while (test_variants.size() < 3) {
                         Word w = variants.remove(0);
+                        if (w.getTranslationData().equals(word.getTranslationData())) continue;
                         if (!test_variants.contains(w)) {
                             boolean fl = true;
                             for (Word w2 : test_variants) {
@@ -223,13 +225,20 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                         break;
                     case TYPE:
                         EditText editText = (EditText) ((View)v.getParent()).findViewById(R.id.learn_edit1);
-                        if (editText.getText().toString().toLowerCase().equals(word.getWord())) {
+                        String entered_var = editText.getText().toString().toLowerCase();
+                        if (entered_var.equals(word.getWord())) {
                             word.updateStat(Word.ST_SUCCESS);
                             v.setBackgroundColor(getResources().getColor(R.color.right));
                         } else {
-                            word.updateStat(Word.ST_FAIL);
-                            mListener.forceWord(word);
-                            v.setBackgroundColor(getResources().getColor(R.color.wrong));
+                            if (dbHelper.chkWord(entered_var, word.getTranslationData(), dictId) != null){
+                                Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Введите другое слово же!", Toast.LENGTH_SHORT);
+                                toast.show();
+                                break;
+                            } else {
+                                word.updateStat(Word.ST_FAIL);
+                                mListener.forceWord(word);
+                                v.setBackgroundColor(getResources().getColor(R.color.wrong));
+                            }
                         }
                         dbHelper.updateWordById(word, dictId);
                         mListener.nextPage(true);

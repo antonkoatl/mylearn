@@ -363,5 +363,55 @@ public class DBHelper extends SQLiteOpenHelper {
         String[] whereArgs = new String[] { String.valueOf(word.getId()) };
 
         db.delete(table_name, whereClause, whereArgs);
+
+        changeWordsCount(dict_id, -1);
+    }
+
+    public Word chkWord(String word, String translation, long dict_id) {
+        Word result = null;
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        String selection = wColWord + "=? AND " + wColTranslation + "=?";
+        String[] selectionArgs = new String[] { word, translation};
+
+        Cursor cursor = db.query(getWordsTableName(dict_id), null, selection, selectionArgs, null, null, null);
+
+        if(cursor.moveToFirst()) {
+            result = new Word();
+            result.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
+            result.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
+            result.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
+            result.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
+        }
+        cursor.close();
+
+        return result;
+    }
+
+    public int countWords(long dict_id, int stat_from, int stat_to) {
+        Time time = new Time();
+        time.setToNow();
+        return countWords(dict_id, stat_from, stat_to, time.toMillis(false));
+    }
+
+    public int countWords(long dict_id, int stat_from, int stat_to, long timestamp) {
+        int result = 0;
+        SQLiteDatabase db = getReadableDatabase();
+
+        String selection = wColStatus + ">=? AND " + wColStatus + "<=? AND " + wColLastTimestamp + "<=?";
+        String[] selectionArgs = new String[] { String.valueOf(stat_from), String.valueOf(stat_to), String.valueOf(timestamp)};
+
+        Cursor cursor = db.query(getWordsTableName(dict_id), null, selection, selectionArgs, null, null, null);
+
+        if(cursor.moveToFirst()){
+            result = cursor.getCount();
+        } else {
+            result = 0;
+        }
+
+        cursor.close();
+
+        return result;
     }
 }

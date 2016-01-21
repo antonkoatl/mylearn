@@ -1,5 +1,7 @@
 package com.noname.mylearn;
 
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -17,7 +19,8 @@ public class LearnAdapter extends FragmentStatePagerAdapter {
 
     DBHelper dbHelper;
     long dictId;
-    List<Word> wordsToLearn;
+
+    ArrayList<Word> wordsToLearn;
     Word last_word; // следующее слово
     Word last_word2; // текущее слово
     Word forcedWord;
@@ -52,7 +55,7 @@ public class LearnAdapter extends FragmentStatePagerAdapter {
 
     // Функция составления списка слов на изучение
     void makeWordsList(){
-        List<Word> words = new ArrayList<>();
+        ArrayList<Word> words = new ArrayList<>();
         Time time = new Time();
         time.setToNow();
 
@@ -93,14 +96,28 @@ public class LearnAdapter extends FragmentStatePagerAdapter {
         return POSITION_UNCHANGED;
     }
 
-    /*
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        super.destroyItem(container, position, object);
-        FragmentManager manager = ((Fragment) object).getFragmentManager();
-        FragmentTransaction trans = manager.beginTransaction();
-        trans.remove((Fragment) object);
-        trans.commit();
-    }*/
+    public Parcelable saveState() {
+        Bundle state = (Bundle) super.saveState();
+
+        // Key must not start with 'f'
+        state.putParcelableArrayList("la_wordsToLearn", wordsToLearn);
+        state.putParcelable("la_last_word", last_word);
+        state.putParcelable("la_last_word2", last_word2);
+        state.putParcelable("la_forcedWord", forcedWord);
+
+        return state;
+    }
+
+    @Override
+    public void restoreState(Parcelable state, ClassLoader loader) {
+        super.restoreState(state, loader);
+        Bundle bundle = (Bundle)state;
+
+        wordsToLearn = bundle.getParcelableArrayList("la_wordsToLearn");
+        last_word = bundle.getParcelable("la_last_word");
+        last_word2 = bundle.getParcelable("la_last_word2");
+        forcedWord = bundle.getParcelable("la_forcedWord");
+    }
 
 }

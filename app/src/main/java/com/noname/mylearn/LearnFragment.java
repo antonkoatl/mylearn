@@ -29,6 +29,8 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
     long dictId;
     DBHelper dbHelper;
 
+    ArrayList<Word> test_variants;
+
     // Интерфейс для работы с фрагментами
     public interface LearnFragmentListener {
         void nextPage(boolean delayed);
@@ -105,6 +107,10 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
 
         dbHelper = DBHelper.getInstance(this.getActivity());
 
+        if (savedInstanceState != null) {
+            test_variants = savedInstanceState.getParcelableArrayList("test_variants");
+        }
+
         mListener.setDebugInfo();
     }
 
@@ -122,50 +128,53 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
             case TEST:
                 view = inflater.inflate(R.layout.learn_fragment_test, null);
 
-                List<Word> variants = new ArrayList<>();
+                if (test_variants == null) {
+                    List<Word> variants = new ArrayList<>();
 
-                for(Word w: mListener.getCurrentWords()){
-                    if (!w.equals(word)) variants.add(w);
-                }
-
-                for(Word w: dbHelper.loadWordsForLearn(dictId, 10, 0, 0, 8, false)){
-                    if (!w.equals(word)) variants.add(w);
-                }
-
-                Collections.shuffle(variants);
-
-                List<Word> variants2 = new ArrayList<>();
-                while (variants2.size() < 3) {
-                    Word w = variants.remove(0);
-                    if (!variants2.contains(w)) {
-                        boolean fl = true;
-                        for(Word w2: variants2) {
-                            if (w2.getTranslationData().equals(w.getTranslationData())) fl = false;
-                        }
-                        if (fl) variants2.add(w);
+                    for (Word w : mListener.getCurrentWords()) {
+                        if (!w.equals(word)) variants.add(w);
                     }
+
+                    for (Word w : dbHelper.loadWordsForLearn(dictId, 10, 0, 0, 8, false)) {
+                        if (!w.equals(word)) variants.add(w);
+                    }
+
+                    Collections.shuffle(variants);
+
+                    test_variants = new ArrayList<>();
+                    while (test_variants.size() < 3) {
+                        Word w = variants.remove(0);
+                        if (!test_variants.contains(w)) {
+                            boolean fl = true;
+                            for (Word w2 : test_variants) {
+                                if (w2.getTranslationData().equals(w.getTranslationData()))
+                                    fl = false;
+                            }
+                            if (fl) test_variants.add(w);
+                        }
+                    }
+
+                    test_variants.add(word);
+
+                    Collections.shuffle(test_variants);
                 }
-
-                variants2.add(word);
-
-                Collections.shuffle(variants2);
 
                 Button button1 = (Button) view.findViewById(R.id.learn_button_choice1);
                 button1.setOnClickListener(this);
-                button1.setText(variants2.get(0).getTranslationData());
-                button1.setTag(variants2.get(0).getId());
+                button1.setText(test_variants.get(0).getTranslationData());
+                button1.setTag(test_variants.get(0).getId());
                 Button button2 = (Button) view.findViewById(R.id.learn_button_choice2);
                 button2.setOnClickListener(this);
-                button2.setText(variants2.get(1).getTranslationData());
-                button2.setTag(variants2.get(1).getId());
+                button2.setText(test_variants.get(1).getTranslationData());
+                button2.setTag(test_variants.get(1).getId());
                 Button button3 = (Button) view.findViewById(R.id.learn_button_choice3);
                 button3.setOnClickListener(this);
-                button3.setText(variants2.get(2).getTranslationData());
-                button3.setTag(variants2.get(2).getId());
+                button3.setText(test_variants.get(2).getTranslationData());
+                button3.setTag(test_variants.get(2).getId());
                 Button button4 = (Button) view.findViewById(R.id.learn_button_choice4);
                 button4.setOnClickListener(this);
-                button4.setText(variants2.get(3).getTranslationData());
-                button4.setTag(variants2.get(3).getId());
+                button4.setText(test_variants.get(3).getTranslationData());
+                button4.setTag(test_variants.get(3).getId());
                 break;
             case TYPE:
                 view = inflater.inflate(R.layout.learn_fragment_type, null);
@@ -265,5 +274,11 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                         break;
                 }
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("test_variants", test_variants);
     }
 }

@@ -55,7 +55,7 @@ public class LearnActivity extends ActionBarActivity implements LearnFragment.Le
     @Override
     public void setDebugInfo() {
         TextView textView = (TextView) findViewById(R.id.learn_debug_info);
-        textView.setText(mAdapter.last_word2 != null ? String.valueOf(mAdapter.last_word2.getStat()) : "");
+        if(textView != null)textView.setText((mAdapter != null && mAdapter.last_word2 != null) ? String.valueOf(mAdapter.last_word2.getStat()) : "");
     }
 
     @Override
@@ -64,4 +64,5 @@ public class LearnActivity extends ActionBarActivity implements LearnFragment.Le
         mAdapter.notifyDataSetChanged();
         mAdapter.wordsToLearn = null;
     }
+
 }

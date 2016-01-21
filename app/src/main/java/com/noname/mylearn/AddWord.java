@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 public class AddWord extends ActionBarActivity {
@@ -53,6 +54,8 @@ public class AddWord extends ActionBarActivity {
         // получаем слово для редактирования
         if (action == ADD_WORD) {
             word = new Word();
+            Button btn_del = (Button) findViewById(R.id.edit_word_btn_del);
+            btn_del.setVisibility(View.INVISIBLE);
         }
         if (action == EDIT_WORD) {
             word = dbHelper.getWordById(word_id, dict_id);
@@ -62,18 +65,28 @@ public class AddWord extends ActionBarActivity {
     }
 
     public void saveOnClick(View v){
-        if (action == ADD_WORD) {
-            setResult(EditDict.RESULT_ADDED, null);
-            word.setWord(EditWord.getText().toString());
-            word.setTranslationFromData(EditTranslation.getText().toString());
-            dbHelper.insertWord(dict_id, word);
+        if (v.getId() == R.id.button_save) {
+            if (action == ADD_WORD) {
+                setResult(EditDict.RESULT_ADDED, null);
+                word.setWord(EditWord.getText().toString());
+                word.setTranslationFromData(EditTranslation.getText().toString());
+                dbHelper.insertWord(dict_id, word);
+            }
+            if (action == EDIT_WORD) {
+                setResult(EditDict.RESULT_EDITED, null);
+                word.setWord(EditWord.getText().toString());
+                word.setTranslationFromData(EditTranslation.getText().toString());
+                dbHelper.updateWordById(word, dict_id);
+            }
+            finish();
         }
-        if (action == EDIT_WORD) {
-            setResult(EditDict.RESULT_EDITED, null);
-            word.setWord(EditWord.getText().toString());
-            word.setTranslationFromData(EditTranslation.getText().toString());
-            dbHelper.updateWordById(word, dict_id);
+
+        if (v.getId() == R.id.edit_word_btn_del) {
+            if (action == EDIT_WORD) {
+                setResult(EditDict.RESULT_EDITED, null);
+                dbHelper.deleteWordById(word, dict_id);
+            }
+            finish();
         }
-        finish();
     }
 }

@@ -53,4 +53,14 @@
         android:layout_below="@+id/editText2"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Удалить"
+        android:id="@+id/edit_word_btn_del"
+        android:layout_below="@+id/editText2"
+        android:layout_toRightOf="@+id/button_save"
+        android:layout_toEndOf="@+id/button_save"
+        android:onClick="saveOnClick"/>
 </RelativeLayout>

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.util.List;
@@ -34,6 +35,9 @@ public class LearnActivity extends ActionBarActivity implements LearnFragment.Le
 
     @Override
     public void nextPage(boolean delayed) {
+        if (mAdapter.last_word == null) {
+            mAdapter.notifyDataSetChanged();
+        }
         if (delayed) {
             mHandler.postDelayed(new Runnable() {
                 @Override

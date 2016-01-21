@@ -269,7 +269,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getReadableDatabase();
 
-        String selection = wColStatus + ">=? AND " + wColStatus + "<=? AND " + wColLastTimestamp + "<?";
+        String selection = wColStatus + ">=? AND " + wColStatus + "<=? AND " + wColLastTimestamp + "<=?";
         String[] selectionArgs = new String[] { String.valueOf(stat_from), String.valueOf(stat_to), String.valueOf(timestamp)};
         String order_by = asc ? wColLastTimestamp + " ASC" : wColLastTimestamp + " DESC";
 
@@ -356,4 +356,12 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update(table_name, cv, selection, sel_args);
     }
 
+    public void deleteWordById(Word word, long dict_id) {
+        String table_name = getWordsTableName(dict_id);
+        SQLiteDatabase db = getWritableDatabase();
+        String whereClause = wColId + "=?";
+        String[] whereArgs = new String[] { String.valueOf(word.getId()) };
+
+        db.delete(table_name, whereClause, whereArgs);
+    }
 }

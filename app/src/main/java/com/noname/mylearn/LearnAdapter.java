@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
@@ -49,7 +50,6 @@ public class LearnAdapter extends FragmentStatePagerAdapter {
             last_word2 = last_word;
             last_word = wordsToLearn.size() > 0 ? wordsToLearn.remove(0) : null;
         }
-
         return LearnFragment.newInstance(last_word, dictId);
     }
 
@@ -90,7 +90,9 @@ public class LearnAdapter extends FragmentStatePagerAdapter {
     @Override
     public int getItemPosition(Object object)
     {
-        if(forcedWord != null && ((LearnFragment) object).word.equals(last_word))
+        if(forcedWord != null && ((LearnFragment) object).word != null && ((LearnFragment) object).word.equals(last_word))
+            return POSITION_NONE;
+        if(((LearnFragment) object).type == LearnFragment.NOWORD)
             return POSITION_NONE;
 
         return POSITION_UNCHANGED;

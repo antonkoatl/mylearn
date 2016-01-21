@@ -29,6 +29,10 @@
             android:name=".LearnActivity"
             android:label="@string/title_activity_learn_activity" >
         </activity>
+        <activity
+            android:name=".DictDialog"
+            android:label="@string/title_activity_dict_dialog" >
+        </activity>
     </application>
 
 </manifest>

@@ -4,4 +4,5 @@
     <string name="title_activity_edit_dict">EditDict</string>
     <string name="title_activity_add_word">AddWord</string>
     <string name="title_activity_learn_activity">LearnActivity</string>
+    <string name="title_activity_dict_dialog">DIctDialog</string>
 </resources>

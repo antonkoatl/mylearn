@@ -1,73 +1,64 @@
 package com.noname.mylearn;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DictDialog extends DialogFragment {
+public class DictDialog extends ActionBarActivity {
     List<Dictionary> dicts;
+    ArrayAdapter<String> adapter;
+    List<String> data;
+    ListView DictionaryList;
 
-    // Интерфейс для передачи словря в активити
-    public interface NoticeDialogListener {
-        public void selectedDict(Dictionary dict);
-    }
-
-    NoticeDialogListener mListener;
-
-    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        // Verify that the host activity implements the callback interface
-        try {
-            // Instantiate the NoticeDialogListener so we can send events to the host
-            mListener = (NoticeDialogListener) activity;
-        } catch (ClassCastException e) {
-            // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(activity.toString()
-                    + " must implement NoticeDialogListener");
-        }
-    }
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_dict_dialog);
+        data = new ArrayList<>(); // Список пунктов диалога
 
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        List<String> data = new ArrayList<>(); // Список пунктов диалога
-        data.add("New"); // Отдельный пункт для добавления словаря
-
-        dicts = DBHelper.getInstance(this.getActivity()).loadDicts(100, 0); // Загрузка 100 словарей из бд
+        dicts = DBHelper.getInstance(this).loadDicts(100, 0); // Загрузка 100 словарей из бд
         for (Dictionary dict: dicts) {
             data.add(dict.getName());
         }
 
+        DictionaryList = (ListView) findViewById(R.id.DictionaryList);
+        DictionaryList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         // Адаптер для пунктов диалога
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.select_dialog_item, data);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, data);
+        DictionaryList.setAdapter(adapter);
+        DictionaryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        // Создание диалога
-        AlertDialog.Builder adb = new AlertDialog.Builder(getActivity())
-                .setAdapter(adapter, myClickListener);
-        return adb.create();
-    }
-
-    // Обработчик нажатия на пункт списка диалога
-    DialogInterface.OnClickListener myClickListener = new DialogInterface.OnClickListener() {
-
-        public void onClick(DialogInterface dialog, int which) {
-            // Нулевой элемент - добавление словаря
-            if (which == 0) {
-                Dictionary dict = new Dictionary();
-                dict.setId( DBHelper.getInstance(DictDialog.this.getActivity()).insertDict(dict) );
-                mListener.selectedDict(dict); // Устанавливаем словарь в активити создавшей диалог
-            } else {
-                mListener.selectedDict(dicts.get(which - 1)); // Устанавливаем словарь в активити создавшей диалог
             }
+        });
+    }
+    public void selectOnClick(View v){
+        switch (v.getId()) {
+            case R.id.button_select_dict:
+                // получаем Intent, который вызывал это Activity
+                Intent intent = getIntent();
+                // сохраняем id выбранного словаря
+                intent.putExtra(MainActivity.DICT_ID, dicts.get(DictionaryList.getCheckedItemPosition()).getId());
+
+                setResult(RESULT_OK, intent);
+                finish();
+                break;
+            case R.id.button_add_dictionary:
+                Dictionary dict = new Dictionary();
+                dict.setName(String.valueOf(data.size()));
+                dict.setId(DBHelper.getInstance(DictDialog.this).insertDict(dict));
+
+                dicts.add(dict);
+                data.add(dict.getName());
+
+                adapter.notifyDataSetChanged();
         }
-    };
+    }
 }

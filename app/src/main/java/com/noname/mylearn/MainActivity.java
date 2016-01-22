@@ -14,9 +14,7 @@ import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
     public static final int REQUEST_CODE_SELECTED = 300;
-    public static final int REQUEST_CODE_WORD_ADDED = 301;
     public static final String DICT_ID = "dict_id";
-    public static final String DICT_WORDS_COUNT = "dict_words_count";
 
     Dictionary currentDict;
 
@@ -84,9 +82,7 @@ public class MainActivity extends ActionBarActivity {
                 if(currentDict != null) {
                     intent = new Intent(this, EditDict.class);
                     intent.putExtra(DICT_ID, currentDict.getId());
-                    intent.putExtra(DICT_WORDS_COUNT, currentDict.getWordsCount());
-
-                    startActivityForResult(intent, REQUEST_CODE_WORD_ADDED);
+                    startActivity(intent);
                 }
                 else {
                     Toast toast = Toast.makeText(getApplicationContext(), "Выберите словарь же!", Toast.LENGTH_SHORT);
@@ -115,12 +111,8 @@ public class MainActivity extends ActionBarActivity {
             switch(requestCode) {
                 case REQUEST_CODE_SELECTED:
                     Long idDict = data.getLongExtra(DICT_ID, 0);
-                    selectedDict( dbHelper.getDictById(idDict) );
+                    selectedDict(dbHelper.getDictById(idDict));
                     break;
-                case REQUEST_CODE_WORD_ADDED:
-                    currentDict.setWordsCount(data.getIntExtra(DICT_WORDS_COUNT, -1));
-                    TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
-                    textLabel_wordsCount.setText("Количество слов: " + currentDict.getWordsCount());
             }
         }
     }
@@ -132,16 +124,16 @@ public class MainActivity extends ActionBarActivity {
         editor.putLong(SAVED_ID_DICT, currentDict.getId());
         editor.apply();
 
-        TextView textLabel_currentDict = (TextView) findViewById(R.id.currentDictTextView);
-        textLabel_currentDict.setText("Текущий словарь: " + dict.getName());
-        TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
-        textLabel_wordsCount.setText("Количество слов: " + dict.getWordsCount());
-
         updateDictInfo();
     }
 
+    // Обвновляет информацию о словаре из бд и отображает на форме
     void updateDictInfo(){
+        if(currentDict == null) return;
         currentDict = dbHelper.getDictById(currentDict.getId());
+
+        TextView textLabel_currentDict = (TextView) findViewById(R.id.currentDictTextView);
+        textLabel_currentDict.setText("Текущий словарь: " + currentDict.getName());
 
         Time time = new Time();
         time.setToNow();

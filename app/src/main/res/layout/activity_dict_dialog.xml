@@ -12,7 +12,7 @@
         android:layout_above="@+id/button_select_dict" />
 
     <Button
-        android:layout_width="170px"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Выбрать"
         android:id="@+id/button_select_dict"
@@ -24,7 +24,7 @@
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:layout_width="170px"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Добавить"
         android:id="@+id/button_add_dictionary"

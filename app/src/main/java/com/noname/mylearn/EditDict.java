@@ -116,12 +116,6 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
                 getSupportLoaderManager().getLoader(0).forceLoad();
                 //scAdapter.notifyDataSetChanged();
             }
-            if(resultCode == EditDict.RESULT_ADDED){
-                int wordsCount = getIntent().getIntExtra(MainActivity.DICT_WORDS_COUNT, 0);
-                Intent intent = getIntent();
-                intent.putExtra(MainActivity.DICT_WORDS_COUNT, wordsCount + 1);
-                setResult(RESULT_OK, intent);
-            }
         }
     }
 

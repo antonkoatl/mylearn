@@ -251,7 +251,6 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
             case R.id.learn_button_choice4:
                 switch (type) {
                     case TEST:
-                        //if (v.getTag() == word.getId()) {
                         if (v.getTag().equals(word.getId())) {
                             word.updateStat(Word.ST_SUCCESS);
                             v.setBackgroundColor(getResources().getColor(R.color.right));

@@ -307,15 +307,26 @@ public class DBHelper extends SQLiteOpenHelper {
 
         Cursor cursor = db.query(dictTable, null, selection, sel_args, null, null, null);
 
-        if(cursor.moveToFirst()){
+        if (cursor.moveToFirst()) {
             dict = new Dictionary();
             dict.setId(cursor.getLong(cursor.getColumnIndex(dColId)));
             dict.setName(cursor.getString(cursor.getColumnIndex(dColName)));
             dict.setWordsCount(cursor.getInt(cursor.getColumnIndex(dWordsCount)));
         }
+
         cursor.close();
 
         return dict;
+    }
+
+    public Dictionary[] getDictsById(long[] dict_ids) {
+        Dictionary[] dicts = new Dictionary[dict_ids.length];
+
+        for (int i = 0; i < dict_ids.length; i++) {
+            dicts[i] = getDictById(dict_ids[i]);
+        }
+
+        return dicts;
     }
 
     public Word getWordById(long word_id, long dict_id){

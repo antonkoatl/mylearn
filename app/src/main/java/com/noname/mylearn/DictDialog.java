@@ -45,7 +45,7 @@ public class DictDialog extends ActionBarActivity {
                 // получаем Intent, который вызывал это Activity
                 Intent intent = getIntent();
                 // сохраняем id выбранного словаря
-                intent.putExtra(MainActivity.DICT_ID, dicts.get(DictionaryList.getCheckedItemPosition()).getId());
+                intent.putExtra(MainActivity.DICT_ID, new long[]{dicts.get(DictionaryList.getCheckedItemPosition()).getId()});
 
                 setResult(RESULT_OK, intent);
                 finish();

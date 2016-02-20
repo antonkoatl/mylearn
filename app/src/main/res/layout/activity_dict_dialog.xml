@@ -17,21 +17,20 @@
         android:text="Выбрать"
         android:id="@+id/button_select_dict"
         android:onClick="selectOnClick"
-        android:layout_marginRight="55dp"
-        android:layout_marginEnd="55dp"
-        android:layout_alignTop="@+id/button_add_dictionary"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/button_add_dictionary"
+        android:layout_toEndOf="@+id/button_add_dictionary"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Добавить"
         android:id="@+id/button_add_dictionary"
+        android:onClick="selectOnClick"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/button_select_dict"
-        android:layout_toStartOf="@+id/button_select_dict"
-        android:onClick="selectOnClick" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="false"
+        />
 
 
 </RelativeLayout>

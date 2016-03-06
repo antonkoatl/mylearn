@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.format.Time;
 import android.view.Menu;
@@ -18,9 +19,8 @@ public class MainActivity extends ActionBarActivity {
 
     Dictionary[] currentDicts;
 
-    //public static final String APP_PREFERENCES = "settings";
     SharedPreferences sPref;
-    final String SAVED_ID_DICT = "dict_ids";
+    public static final String SAVED_ID_DICT = "dict_ids";
 
     DBHelper dbHelper;
 
@@ -31,7 +31,8 @@ public class MainActivity extends ActionBarActivity {
 
         dbHelper = DBHelper.getInstance(this);
 
-        sPref = getPreferences(MODE_PRIVATE);
+        sPref = PreferenceManager.getDefaultSharedPreferences(this);
+
         String dictIdStr = sPref.getString(SAVED_ID_DICT, "");
         if (dictIdStr.length() > 0) {
             String[] dictIdsStr = dictIdStr.split(",");
@@ -126,7 +127,7 @@ public class MainActivity extends ActionBarActivity {
     public void selectedDicts(Dictionary[] dicts) {
         currentDicts = dicts;
 
-        sPref = getPreferences(MODE_PRIVATE);
+        sPref = PreferenceManager.getDefaultSharedPreferences(this);
         Editor editor = sPref.edit();
 
         String dict_ids = "";
@@ -146,10 +147,23 @@ public class MainActivity extends ActionBarActivity {
     // Обвновляет информацию о словаре из бд и отображает на форме
     void updateDictInfo(){
         if(currentDicts == null) return;
-        currentDicts[0] = dbHelper.getDictById(currentDicts[0].getId());
+        for(int i = 0; i < currentDicts.length; i++){
+            currentDicts[i] = dbHelper.getDictById(currentDicts[i].getId());
+        }
 
+        // строка с перечислением текущих словарей
+        String currentDictString = "Текущие словари: ";
+        // общее количество слов
+        int wordsCount = 0;
+        int countWords = 0;
+        for(int i = 0; i < currentDicts.length; i++) {
+            currentDictString += currentDicts[i].getName() + ", ";
+            wordsCount += currentDicts[i].getWordsCount();
+            countWords += dbHelper.countWords(currentDicts[i].getId(), 10, 100);
+        }
+        currentDictString = currentDictString.substring(0, currentDictString.length() - 2);
         TextView textLabel_currentDict = (TextView) findViewById(R.id.currentDictTextView);
-        textLabel_currentDict.setText("Текущий словарь: " + currentDicts[0].getName());
+        textLabel_currentDict.setText(currentDictString);
 
         Time time = new Time();
         time.setToNow();
@@ -157,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
         long time_last_week = time.toMillis(false) - LearnAdapter.MILLIS_IN_WEEK;
 
         TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
-        textLabel_wordsCount.setText("Количество слов: " + dbHelper.countWords(currentDicts[0].getId(), 10, 100) + "/" + currentDicts[0].getWordsCount());
+        textLabel_wordsCount.setText("Количество слов: " + countWords + "/" + wordsCount);
 
         TextView textLabel_wordsCount2 = (TextView) findViewById(R.id.main_words_today);
         int today = dbHelper.countWords(currentDicts[0].getId(), 1, 5);

@@ -21,16 +21,12 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
     public static final int RESULT_ADDED = 200;
     public static final int RESULT_EDITED = 201;
 
-
-
     ArrayList<String>words = new ArrayList<String>();
 
     //ArrayAdapter<String> adapter;
     SimpleCursorAdapter scAdapter;
     long idDict;
     long idWord;
-
-
 
     static class MyCursorLoader extends CursorLoader {
         DBHelper db;

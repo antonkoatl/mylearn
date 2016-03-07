@@ -60,22 +60,22 @@ public class LearnAdapter extends FragmentStatePagerAdapter {
         time.setToNow();
 
         long time_last_week = time.toMillis(false) - MILLIS_IN_WEEK;
-        List<Word> words_week = dbHelper.loadWordsForLearn(dictId, 3, 0, 9, 9, time_last_week);
+        List<Word> words_week = dbHelper.loadWordsForLearn(dictId, 3, 0, Word.S_LM_CNTRL, Word.S_LM_CNTRL, time_last_week);
         words.addAll(words_week);
 
         if (words.size() < 10) {
             long time_last_day = time.toMillis(false) - MILLIS_IN_DAY;
-            List<Word> words_day = dbHelper.loadWordsForLearn(dictId, 3, 0, 6, 9, time_last_day);
+            List<Word> words_day = dbHelper.loadWordsForLearn(dictId, 3, 0, Word.S_SM_TEST1, Word.S_LM_CNTRL, time_last_day);
             words.addAll(words_day);
         }
 
         if (words.size() < 10) {
-            List<Word> words_now = dbHelper.loadWordsForLearn(dictId, 3, 0, 1, 5);
+            List<Word> words_now = dbHelper.loadWordsForLearn(dictId, 3, 0, Word.S_TEST1, Word.S_CNTRL);
             words.addAll(words_now);
         }
 
         if (words.size() < 10) {
-            List<Word> words_new = dbHelper.loadWordsForLearn(dictId, 2, 0, 0, 0);
+            List<Word> words_new = dbHelper.loadWordsForLearn(dictId, 2, 0, Word.S_NEW, Word.S_NEW);
             words.addAll(words_new);
         }
 

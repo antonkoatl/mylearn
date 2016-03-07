@@ -3,12 +3,11 @@ package com.noname.mylearn;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.util.SparseBooleanArray;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -16,23 +15,23 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.Switch;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
 public class DictDialog extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener {
     List<Dictionary> dicts;
     ArrayAdapter<String> adapter;
     List<String> data;
-    ListView DictionaryList;
+    ListView dictionaryList;
+    SwitchCompat uiSwitch;
+    Button buttonSelectDicts;
     long[] dict_ids;
 
     class MyAdapter extends ArrayAdapter<String>{
         private final Context context;
-        public MyAdapter(Context context, List<String> data) {
-            super(context, android.R.layout.simple_list_item_1, data);
+        public MyAdapter(Context context, List<String> data, int resource) {
+            super(context, resource, data);
             this.context = context;
         }
 
@@ -46,6 +45,12 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dict_dialog);
+
+        // Находим элементы интерфейса
+        uiSwitch = (SwitchCompat) findViewById(R.id.switch1);
+        dictionaryList = (ListView) findViewById(R.id.DictionaryList);
+        buttonSelectDicts = (Button) findViewById(R.id.button_select_dict);
+
         data = new ArrayList<>(); // Список пунктов диалога
 
         dicts = DBHelper.getInstance(this).loadDicts(100, 0); // Загрузка 100 словарей из бд
@@ -53,44 +58,44 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
             data.add(dict.getName());
         }
 
-        Switch switch1 = (Switch) findViewById(R.id.switch1);
-
         SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         String dictIdStr = sPref.getString(MainActivity.SAVED_ID_DICT, "");
-        System.out.println("saved id " + dictIdStr);
+
         if (dictIdStr.length() > 0) {
             String[] dictIdsStr = dictIdStr.split(",");
-            long[] dictIds = new long[dictIdsStr.length];
+            dict_ids = new long[dictIdsStr.length];
             for (int i = 0; i < dictIdsStr.length; i++) {
-                dictIds[i] = Long.parseLong(dictIdsStr[i]);
+                dict_ids[i] = Long.parseLong(dictIdsStr[i]);
             }
-            if(dictIds.length > 1){
-                switch1.setChecked(true);
+            if(dict_ids.length > 1){
                 manySelectedDict();
-
             }
             else {
-                switch1.setChecked(false);
                 oneSelectedDict();
             }
+            selectDictsInListview(dict_ids);
         }
         else {
-            switch1.setChecked(false);
             oneSelectedDict();
         }
-        switch1.setOnCheckedChangeListener(this);
+        uiSwitch.setOnCheckedChangeListener(this);
     }
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        Button button_select_dict = (Button) findViewById(R.id.button_select_dict);
 
+    private void selectDictsInListview(long[] dictIds) {
+        for (long id: dictIds) {
+            for (int i = 0; i < dicts.size(); i++) {
+                if (dicts.get(i).getId() == id) {
+                    dictionaryList.setItemChecked(i, true);
+                }
+            }
+        }
+    }
+
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if(isChecked) {
             manySelectedDict();
-            button_select_dict.setVisibility(View.VISIBLE);
-        }
-        // прячем кнопку при многословарном режиме
-        else {
+        } else {
             oneSelectedDict();
-            button_select_dict.setVisibility(View.INVISIBLE);
         }
     }
     public void selectOnClick(View v){
@@ -115,13 +120,15 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
         }
     }
     public void oneSelectedDict(){
-        DictionaryList = (ListView) findViewById(R.id.DictionaryList);
+        dictionaryList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        uiSwitch.setChecked(false);
+        buttonSelectDicts.setVisibility(View.INVISIBLE); // прячем кнопку при многословарном режиме
         // Адаптер для пунктов диалога
-        adapter = new MyAdapter(this , data);
         //adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
-        DictionaryList.setAdapter(adapter);
+        adapter = new MyAdapter(this , data, android.R.layout.simple_list_item_1);
+        dictionaryList.setAdapter(adapter);
 
-        DictionaryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        dictionaryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = getIntent();
                 // сохраняем id выбранного словаря
@@ -133,25 +140,23 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
         });
     }
     public void manySelectedDict(){
-        DictionaryList = (ListView) findViewById(R.id.DictionaryList);
-        DictionaryList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        dictionaryList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        uiSwitch.setChecked(true);
+        buttonSelectDicts.setVisibility(View.VISIBLE);
         // Адаптер для пунктов диалога
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, data);
-        DictionaryList.setAdapter(adapter);
+        //adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, data);
+        adapter = new MyAdapter(this , data, android.R.layout.simple_list_item_multiple_choice);
+        dictionaryList.setAdapter(adapter);
 
-        DictionaryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        dictionaryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                int checkCount = DictionaryList.getCheckedItemCount();
-                dict_ids = new long[checkCount];
-                SparseBooleanArray checkedItem = DictionaryList.getCheckedItemPositions();
-                int index = 0;
-                for(int i = 0; i < checkedItem.size(); i++){
-                    boolean chk = checkedItem.valueAt(i);
-                    if(chk) {
-                        dict_ids[index] = dicts.get(DictionaryList.getCheckedItemPositions().keyAt(i)).getId();
-                        index++;
-                    }
+                List<Long> ids = new ArrayList<Long>();
+                SparseBooleanArray checkedItems = dictionaryList.getCheckedItemPositions();
+                for (int i = 0; i < checkedItems.size(); i++) {
+                    if (checkedItems.valueAt(i)) ids.add( dicts.get(checkedItems.keyAt(i)).getId() );
                 }
+                dict_ids = new long[ids.size()];
+                for (int i = 0; i < ids.size(); i++) dict_ids[i] = ids.get(i);
             }
         });
     }

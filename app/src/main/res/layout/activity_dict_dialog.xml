@@ -18,8 +18,7 @@
         android:id="@+id/button_select_dict"
         android:onClick="selectOnClick"
         android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/button_add_dictionary"
-        android:layout_toEndOf="@+id/button_add_dictionary"/>
+        android:layout_toRightOf="@+id/button_add_dictionary"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -29,22 +28,18 @@
         android:onClick="selectOnClick"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="false"
         />
 
-    <Switch
+    <android.support.v7.widget.SwitchCompat
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/switch1"
         android:checked="false"
-        android:textOff="Один"
-        android:textOn="Много"
-        android:layout_above="@+id/button_select_dict"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_toStartOf="@+id/button_select_dict"
-        android:layout_alignRight="@+id/button_select_dict"
-        android:layout_alignEnd="@+id/button_select_dict" />
+        android:singleLine="false"
+        android:text="Несколько"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBaseline="@+id/button_add_dictionary"/>
 
 
 </RelativeLayout>

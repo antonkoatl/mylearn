@@ -188,9 +188,9 @@ public class DBHelper extends SQLiteOpenHelper {
 		
 		SQLiteDatabase db = getReadableDatabase();
 
-        String order_by = dColName + " DESC";
+        // String order_by = dColName + " DESC";
 		
-		Cursor cursor = db.query(dictTable, null, null, null, null, null, order_by);
+		Cursor cursor = db.query(dictTable, null, null, null, null, null, null);
 		
 		if(!cursor.moveToFirst()){return result;}
 		

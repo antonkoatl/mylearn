@@ -9,14 +9,12 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class EditDict extends ActionBarActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor> {
+public class EditDictActivity extends ActionBarActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor> {
     public static final int REQUEST_CODE = 100;
     public static final int RESULT_ADDED = 200;
     public static final int RESULT_EDITED = 201;
@@ -78,10 +76,10 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
         switch (v.getId()) {
             case R.id.button_addWord:
                 // Вызываем активити для нового слова
-                Intent intent = new Intent(this, AddWord.class);
-                intent.putExtra(AddWord.ACTION, AddWord.ADD_WORD);
+                Intent intent = new Intent(this, AddWordActivity.class);
+                intent.putExtra(AddWordActivity.ACTION, AddWordActivity.ADD_WORD);
                 intent.putExtra(MainActivity.DICT_ID, idDict);
-                startActivityForResult(intent, EditDict.REQUEST_CODE);
+                startActivityForResult(intent, EditDictActivity.REQUEST_CODE);
         }
     }
 
@@ -89,15 +87,15 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             // вызываем активити для редактирования слова
-            Intent intent = new Intent(EditDict.this, AddWord.class);
-            intent.putExtra(AddWord.ACTION, AddWord.EDIT_WORD);
+            Intent intent = new Intent(EditDictActivity.this, AddWordActivity.class);
+            intent.putExtra(AddWordActivity.ACTION, AddWordActivity.EDIT_WORD);
             // получаем id слова
             TextView c = (TextView) view.findViewById(R.id.TextViewWord);
             idWord = (long)c.getTag();
 
             intent.putExtra(MainActivity.DICT_ID, idDict);
-            intent.putExtra(AddWord.WORD, idWord);
-            startActivityForResult(intent, EditDict.REQUEST_CODE);
+            intent.putExtra(AddWordActivity.WORD, idWord);
+            startActivityForResult(intent, EditDictActivity.REQUEST_CODE);
         }
     };
 
@@ -108,7 +106,7 @@ public class EditDict extends ActionBarActivity implements android.support.v4.ap
 
         if(requestCode == REQUEST_CODE){
             // Обновить список после добавления/редактирования слова
-            if(resultCode == EditDict.RESULT_ADDED || resultCode == EditDict.RESULT_EDITED){
+            if(resultCode == EditDictActivity.RESULT_ADDED || resultCode == EditDictActivity.RESULT_EDITED){
                 getSupportLoaderManager().getLoader(0).forceLoad();
                 //scAdapter.notifyDataSetChanged();
             }

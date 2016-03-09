@@ -159,6 +159,9 @@ public class DBHelper extends SQLiteOpenHelper {
         cv.put(wColLastTimestamp, time.toMillis(false));
 
         db.insert(table_name, null, cv);
+
+        word.setDictId(dict_id);
+
         // инкрементируем количество слов
         changeWordsCount(dict_id, 1);
     }
@@ -199,10 +202,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		
 		for (int i = 0; i < count; i++) {
 			if(cursor_chk){
-	        	Dictionary dict = new Dictionary();
-                dict.setId(cursor.getLong(cursor.getColumnIndex(dColId)));
-                dict.setName(cursor.getString(cursor.getColumnIndex(dColName)));
-                dict.setWordsCount(cursor.getInt(cursor.getColumnIndex(dWordsCount)));
+	        	Dictionary dict = readDictFromCursor(cursor);
 
 	        	result.add(dict);
 	        	cursor_chk = cursor.moveToNext();
@@ -230,11 +230,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         for (int i = 0; i < count; i++) {
             if(cursor_chk){
-                Word word = new Word();
-                word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
-                word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
-                word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
-                word.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
+                Word word = readWordFromCursor(cursor, dict_id);
 
                 result.add(word);
                 cursor_chk = cursor.moveToNext();
@@ -259,8 +255,6 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public List<Word> loadWordsForLearn(long dict_id, int count, int offset, int stat_from, int stat_to, long timestamp){
-        Time time = new Time();
-        time.setToNow();
         return loadWordsForLearn(dict_id, count, offset, stat_from, stat_to, timestamp, true);
     }
 
@@ -282,11 +276,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         for (int i = 0; i < count; i++) {
             if(cursor_chk){
-                Word word = new Word();
-                word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
-                word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
-                word.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
-                word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
+                Word word = readWordFromCursor(cursor, dict_id);
 
                 result.add(word);
                 cursor_chk = cursor.moveToNext();
@@ -308,10 +298,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(dictTable, null, selection, sel_args, null, null, null);
 
         if (cursor.moveToFirst()) {
-            dict = new Dictionary();
-            dict.setId(cursor.getLong(cursor.getColumnIndex(dColId)));
-            dict.setName(cursor.getString(cursor.getColumnIndex(dColName)));
-            dict.setWordsCount(cursor.getInt(cursor.getColumnIndex(dWordsCount)));
+            dict = readDictFromCursor(cursor);
         }
 
         cursor.close();
@@ -340,18 +327,33 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(table_name, null, selection, sel_args, null, null, null);
 
         if(cursor.moveToFirst()){
-            word = new Word();
-            word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
-            word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
-            word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
+            word = readWordFromCursor(cursor, dict_id);
         }
         cursor.close();
 
         return word;
     }
 
-    public void updateWordById(Word word, long dict_id){
-        String table_name = getWordsTableName(dict_id);
+    private Word readWordFromCursor(Cursor cursor, long dict_id) {
+        Word word = new Word();
+        word.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
+        word.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
+        word.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
+        word.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
+        word.setDictId(dict_id);
+        return word;
+    }
+
+    private Dictionary readDictFromCursor(Cursor cursor) {
+        Dictionary dict = new Dictionary();
+        dict.setId(cursor.getLong(cursor.getColumnIndex(dColId)));
+        dict.setName(cursor.getString(cursor.getColumnIndex(dColName)));
+        dict.setWordsCount(cursor.getInt(cursor.getColumnIndex(dWordsCount)));
+        return dict;
+    }
+
+    public void updateWord(Word word) {
+        String table_name = getWordsTableName(word.getDictId());
         SQLiteDatabase db = getWritableDatabase();
         String selection = wColId + "=?";
         String sel_args[] = {String.valueOf(word.getId())};
@@ -367,18 +369,18 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update(table_name, cv, selection, sel_args);
     }
 
-    public void deleteWordById(Word word, long dict_id) {
+    public void deleteWordById(long word_id, long dict_id) {
         String table_name = getWordsTableName(dict_id);
         SQLiteDatabase db = getWritableDatabase();
         String whereClause = wColId + "=?";
-        String[] whereArgs = new String[] { String.valueOf(word.getId()) };
+        String[] whereArgs = new String[] { String.valueOf(word_id) };
 
         db.delete(table_name, whereClause, whereArgs);
 
         changeWordsCount(dict_id, -1);
     }
 
-    public Word chkWord(String word, String translation, long dict_id) {
+    public Word getWord(String word, String translation, long dict_id) {
         Word result = null;
 
         SQLiteDatabase db = getReadableDatabase();
@@ -389,11 +391,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(getWordsTableName(dict_id), null, selection, selectionArgs, null, null, null);
 
         if(cursor.moveToFirst()) {
-            result = new Word();
-            result.setId(cursor.getLong(cursor.getColumnIndex(wColId)));
-            result.setWord(cursor.getString(cursor.getColumnIndex(wColWord)));
-            result.setStat(cursor.getInt(cursor.getColumnIndex(wColStatus)));
-            result.setTranslationFromData(cursor.getString(cursor.getColumnIndex(wColTranslation)));
+            result = readWordFromCursor(cursor, dict_id);
         }
         cursor.close();
 
@@ -424,5 +422,31 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.close();
 
         return result;
+    }
+
+    public int countWordsLToday(long dictId) {
+        Time time = new Time();
+        time.setToNow();
+        long time_last_day = time.toMillis(false) - LearnAdapter.MILLIS_IN_DAY;
+        long time_last_week = time.toMillis(false) - LearnAdapter.MILLIS_IN_WEEK;
+
+        int today = countWords(dictId, Word.S_TEST1, Word.S_CNTRL);
+        today += countWords(dictId, Word.S_SM_TEST1, Word.S_SM_CNTRL, time_last_day);
+        today += countWords(dictId, Word.S_LM_CNTRL, Word.S_LM_CNTRL, time_last_week);
+        return today;
+    }
+
+    public int countWordsLTomorrow(long dictId) {
+        Time time = new Time();
+        time.setToNow();
+        long time_last_week = time.toMillis(false) - LearnAdapter.MILLIS_IN_WEEK;
+
+        int tomorrow = countWords(dictId, Word.S_SM_TEST1, Word.S_SM_CNTRL);
+        tomorrow += countWords(dictId, Word.S_LM_CNTRL, Word.S_LM_CNTRL, (long) (time_last_week*0.857));
+        return tomorrow;
+    }
+
+    public int countWordsNew(long dictId) {
+        return countWords(dictId, Word.S_NEW, Word.S_NEW);
     }
 }

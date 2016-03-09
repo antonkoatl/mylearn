@@ -14,67 +14,67 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Словарь"
-        android:id="@+id/button_dict"
+        android:id="@+id/main_button_dict"
         android:onClick="buttonClick"
         android:layout_below="@+id/main_words_new"
-        android:layout_alignRight="@+id/button_editDict"
-        android:layout_alignEnd="@+id/button_editDict"
-        android:layout_alignLeft="@+id/button_editDict"
-        android:layout_alignStart="@+id/button_editDict" />
+        android:layout_alignRight="@+id/main_button_editDict"
+        android:layout_alignEnd="@+id/main_button_editDict"
+        android:layout_alignLeft="@+id/main_button_editDict"
+        android:layout_alignStart="@+id/main_button_editDict" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Редактировать"
-        android:id="@+id/button_editDict"
+        android:id="@+id/main_button_editDict"
         android:onClick="buttonClick"
-        android:layout_below="@+id/button_dict"
+        android:layout_below="@+id/main_button_dict"
         android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Учить"
-        android:id="@+id/button3"
+        android:id="@+id/main_button_learn"
         android:onClick="buttonClick"
-        android:layout_below="@+id/button_editDict"
-        android:layout_alignRight="@+id/button_editDict"
-        android:layout_alignEnd="@+id/button_editDict"
-        android:layout_alignLeft="@+id/button_editDict"
-        android:layout_alignStart="@+id/button_editDict" />
+        android:layout_below="@+id/main_button_editDict"
+        android:layout_alignRight="@+id/main_button_editDict"
+        android:layout_alignEnd="@+id/main_button_editDict"
+        android:layout_alignLeft="@+id/main_button_editDict"
+        android:layout_alignStart="@+id/main_button_editDict" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Количество слов:"
-        android:id="@+id/wordsCountTextView"
+        android:text="Выучено слов:"
+        android:id="@+id/main_text_count"
         android:layout_alignParentTop="true"
         android:layout_marginTop="69dp"
-        android:layout_alignLeft="@+id/button_dict"
-        android:layout_alignStart="@+id/button_dict" />
+        android:layout_alignLeft="@+id/main_button_dict"
+        android:layout_alignStart="@+id/main_button_dict" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Текущий словарь: не выбран"
-        android:id="@+id/currentDictTextView"
+        android:id="@+id/main_text_dicts"
         android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/wordsCountTextView"
-        android:layout_alignStart="@+id/wordsCountTextView"
+        android:layout_alignLeft="@+id/main_text_count"
+        android:layout_alignStart="@+id/main_text_count"
         android:layout_marginTop="25dp"
-        android:layout_alignRight="@+id/button_dict"
-        android:layout_alignEnd="@+id/button_dict" />
+        android:layout_alignRight="@+id/main_button_dict"
+        android:layout_alignEnd="@+id/main_button_dict" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Учить сегодня:"
         android:id="@+id/main_words_today"
-        android:layout_below="@+id/wordsCountTextView"
-        android:layout_alignLeft="@+id/wordsCountTextView"
-        android:layout_alignStart="@+id/wordsCountTextView"
-        android:layout_alignRight="@+id/wordsCountTextView"
-        android:layout_alignEnd="@+id/wordsCountTextView" />
+        android:layout_below="@+id/main_text_count"
+        android:layout_alignLeft="@+id/main_text_count"
+        android:layout_alignStart="@+id/main_text_count"
+        android:layout_alignRight="@+id/main_text_count"
+        android:layout_alignEnd="@+id/main_text_count" />
 
     <TextView
         android:layout_width="wrap_content"

@@ -19,7 +19,7 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DictDialog extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener {
+public class DictActivity extends ActionBarActivity implements CompoundButton.OnCheckedChangeListener {
     List<Dictionary> dicts;
     ArrayAdapter<String> adapter;
     List<String> data;
@@ -44,45 +44,34 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dict_dialog);
+        setContentView(R.layout.activity_dict);
 
         // Находим элементы интерфейса
         uiSwitch = (SwitchCompat) findViewById(R.id.switch1);
         dictionaryList = (ListView) findViewById(R.id.DictionaryList);
         buttonSelectDicts = (Button) findViewById(R.id.button_select_dict);
 
-        data = new ArrayList<>(); // Список пунктов диалога
-
         dicts = DBHelper.getInstance(this).loadDicts(100, 0); // Загрузка 100 словарей из бд
+
+        // Список словарей
+        data = new ArrayList<>();
         for (Dictionary dict: dicts) {
             data.add(dict.getName());
         }
 
-        SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        String dictIdStr = sPref.getString(MainActivity.SAVED_ID_DICT, "");
-
-        if (dictIdStr.length() > 0) {
-            String[] dictIdsStr = dictIdStr.split(",");
-            dict_ids = new long[dictIdsStr.length];
-            for (int i = 0; i < dictIdsStr.length; i++) {
-                dict_ids[i] = Long.parseLong(dictIdsStr[i]);
-            }
-            if(dict_ids.length > 1){
-                manySelectedDict();
-            }
-            else {
-                oneSelectedDict();
-            }
-            selectDictsInListview(dict_ids);
-        }
-        else {
+        dict_ids = getIntent().getLongArrayExtra(MainActivity.DICT_IDS);
+        if(dict_ids.length > 1){
+            manySelectedDict();
+            selectDictsInListview();
+        } else {
             oneSelectedDict();
         }
+
         uiSwitch.setOnCheckedChangeListener(this);
     }
 
-    private void selectDictsInListview(long[] dictIds) {
-        for (long id: dictIds) {
+    private void selectDictsInListview() {
+        for (long id: dict_ids) {
             for (int i = 0; i < dicts.size(); i++) {
                 if (dicts.get(i).getId() == id) {
                     dictionaryList.setItemChecked(i, true);
@@ -98,6 +87,7 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
             oneSelectedDict();
         }
     }
+
     public void selectOnClick(View v){
         switch (v.getId()) {
             case R.id.button_select_dict:
@@ -111,7 +101,7 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
             case R.id.button_add_dictionary:
                 Dictionary dict = new Dictionary();
                 dict.setName(String.valueOf(data.size()));
-                dict.setId(DBHelper.getInstance(DictDialog.this).insertDict(dict));
+                dict.setId(DBHelper.getInstance(DictActivity.this).insertDict(dict));
 
                 dicts.add(dict);
                 data.add(dict.getName());
@@ -119,6 +109,7 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
                 adapter.notifyDataSetChanged();
         }
     }
+
     public void oneSelectedDict(){
         dictionaryList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         uiSwitch.setChecked(false);
@@ -139,6 +130,7 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
             }
         });
     }
+
     public void manySelectedDict(){
         dictionaryList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         uiSwitch.setChecked(true);
@@ -153,7 +145,7 @@ public class DictDialog extends ActionBarActivity implements CompoundButton.OnCh
                 List<Long> ids = new ArrayList<Long>();
                 SparseBooleanArray checkedItems = dictionaryList.getCheckedItemPositions();
                 for (int i = 0; i < checkedItems.size(); i++) {
-                    if (checkedItems.valueAt(i)) ids.add( dicts.get(checkedItems.keyAt(i)).getId() );
+                    if (checkedItems.valueAt(i)) ids.add(dicts.get(checkedItems.keyAt(i)).getId());
                 }
                 dict_ids = new long[ids.size()];
                 for (int i = 0; i < ids.size(); i++) dict_ids[i] = ids.get(i);

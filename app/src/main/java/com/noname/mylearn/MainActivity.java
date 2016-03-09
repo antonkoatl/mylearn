@@ -6,7 +6,6 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
-import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,8 +15,9 @@ import android.widget.Toast;
 public class MainActivity extends ActionBarActivity {
     public static final int REQUEST_CODE_SELECTED = 300;
     public static final String DICT_ID = "dict_id";
+    public static final String DICT_IDS = "dict_id";
 
-    Dictionary[] currentDicts;
+    long[] dictIds = new long[0];
 
     SharedPreferences sPref;
     public static final String SAVED_ID_DICT = "dict_ids";
@@ -36,13 +36,11 @@ public class MainActivity extends ActionBarActivity {
         String dictIdStr = sPref.getString(SAVED_ID_DICT, "");
         if (dictIdStr.length() > 0) {
             String[] dictIdsStr = dictIdStr.split(",");
-            long[] dictIds = new long[dictIdsStr.length];
+            dictIds = new long[dictIdsStr.length];
             for (int i = 0; i < dictIdsStr.length; i++) {
                 dictIds[i] = Long.parseLong(dictIdsStr[i]);
             }
-            if (dictIds.length > 0) {
-                selectedDicts(dbHelper.getDictsById(dictIds));
-            }
+            updateDictInfo();
         }
     }
 
@@ -82,28 +80,27 @@ public class MainActivity extends ActionBarActivity {
 
     public void buttonClick(View v) {
         switch (v.getId()) {
-            case R.id.button_dict:
-                Intent intent = new Intent(this, DictDialog.class);
+            case R.id.main_button_dict:
+                Intent intent = new Intent(this, DictActivity.class);
+                intent.putExtra(DICT_IDS, dictIds);
                 startActivityForResult(intent, REQUEST_CODE_SELECTED);
                 break;
-            case R.id.button_editDict:
-                if(currentDicts != null) {
-                    intent = new Intent(this, EditDict.class);
-                    intent.putExtra(DICT_ID, currentDicts[0].getId());
+            case R.id.main_button_editDict:
+                if(dictIds.length > 0) {
+                    intent = new Intent(this, EditDictActivity.class);
+                    intent.putExtra(DICT_ID, dictIds[0]);
                     startActivity(intent);
-                }
-                else {
+                } else {
                     Toast toast = Toast.makeText(getApplicationContext(), "Выберите словарь же!", Toast.LENGTH_SHORT);
                     toast.show();
                 }
                 break;
-            case R.id.button3:
-                if(currentDicts != null) {
+            case R.id.main_button_learn:
+                if(dictIds.length > 0) {
                     intent = new Intent(this, LearnActivity.class);
-                    intent.putExtra(DICT_ID, currentDicts[0].getId());
+                    intent.putExtra(DICT_IDS, dictIds);
                     startActivity(intent);
-                }
-                else {
+                } else {
                     Toast toast = Toast.makeText(getApplicationContext(), "Выберите словарь же!", Toast.LENGTH_SHORT);
                     toast.show();
                 }
@@ -111,6 +108,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
         }
     }
+
     // Получаем результаты вызванных активити
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -119,23 +117,24 @@ public class MainActivity extends ActionBarActivity {
             switch(requestCode) {
                 case REQUEST_CODE_SELECTED:
                     long[] idDict = data.getLongArrayExtra(DICT_ID);
-                    selectedDicts(dbHelper.getDictsById(idDict));
+                    selectedDicts(idDict);
                     break;
             }
         }
     }
-    public void selectedDicts(Dictionary[] dicts) {
-        currentDicts = dicts;
+
+    public void selectedDicts(long[] dicts) {
+        dictIds = dicts;
 
         sPref = PreferenceManager.getDefaultSharedPreferences(this);
         Editor editor = sPref.edit();
 
         String dict_ids = "";
-        for (Dictionary dict: dicts) {
+        for (long id: dicts) {
             if (dict_ids.length() > 0) {
-                dict_ids += "," + String.valueOf(dict.getId());
+                dict_ids += "," + id;
             } else {
-                dict_ids += String.valueOf(dict.getId());
+                dict_ids += id;
             }
         }
         editor.putString(SAVED_ID_DICT, dict_ids);
@@ -146,47 +145,39 @@ public class MainActivity extends ActionBarActivity {
 
     // Обвновляет информацию о словаре из бд и отображает на форме
     void updateDictInfo(){
-        if(currentDicts == null) return;
-        for(int i = 0; i < currentDicts.length; i++){
-            currentDicts[i] = dbHelper.getDictById(currentDicts[i].getId());
-        }
+        if(dictIds == null) return;
+
+        Dictionary[] currentDicts = dbHelper.getDictsById(dictIds);
 
         // строка с перечислением текущих словарей
         String currentDictString = "Текущие словари: ";
+
         // общее количество слов
-        int wordsCount = 0;
-        int countWords = 0;
-        for(int i = 0; i < currentDicts.length; i++) {
-            currentDictString += currentDicts[i].getName() + ", ";
-            wordsCount += currentDicts[i].getWordsCount();
-            countWords += dbHelper.countWords(currentDicts[i].getId(), 10, 100);
+        int wordsCount = 0, wordsLearned = 0, wordsLToday = 0, wordsLTomorrow = 0, wordsLNew = 0;
+        for(Dictionary dict: currentDicts) {
+            currentDictString += dict.getName() + ", ";
+            wordsCount += dict.getWordsCount();
+            wordsLearned += dbHelper.countWords(dict.getId(), Word.S_LM_LEARNED, 100);
+            wordsLToday += dbHelper.countWordsLToday(dict.getId());
+            wordsLTomorrow += dbHelper.countWordsLTomorrow(dict.getId());
+            wordsLNew += dbHelper.countWordsNew(dict.getId());
         }
+
         currentDictString = currentDictString.substring(0, currentDictString.length() - 2);
-        TextView textLabel_currentDict = (TextView) findViewById(R.id.currentDictTextView);
+        TextView textLabel_currentDict = (TextView) findViewById(R.id.main_text_dicts);
         textLabel_currentDict.setText(currentDictString);
 
-        Time time = new Time();
-        time.setToNow();
-        long time_last_day = time.toMillis(false) - LearnAdapter.MILLIS_IN_DAY;
-        long time_last_week = time.toMillis(false) - LearnAdapter.MILLIS_IN_WEEK;
-
-        TextView textLabel_wordsCount = (TextView) findViewById(R.id.wordsCountTextView);
-        textLabel_wordsCount.setText("Количество слов: " + countWords + "/" + wordsCount);
+        TextView textLabel_wordsCount = (TextView) findViewById(R.id.main_text_count);
+        textLabel_wordsCount.setText("Выучено слов: " + wordsLearned + "/" + wordsCount);
 
         TextView textLabel_wordsCount2 = (TextView) findViewById(R.id.main_words_today);
-        int today = dbHelper.countWords(currentDicts[0].getId(), 1, 5);
-        today += dbHelper.countWords(currentDicts[0].getId(), 6, 8, time_last_day);
-        today += dbHelper.countWords(currentDicts[0].getId(), 9, 9, time_last_week);
-        textLabel_wordsCount2.setText("Учить сегодня: " + String.valueOf(today));
+        textLabel_wordsCount2.setText("Учить сегодня: " + wordsLToday);
 
         TextView textLabel_wordsCount3 = (TextView) findViewById(R.id.main_words_tomorrow);
-        int tomorrow = dbHelper.countWords(currentDicts[0].getId(), 6, 8);
-        tomorrow += dbHelper.countWords(currentDicts[0].getId(), 9, 9, (long) (time_last_week*0.857));
-        textLabel_wordsCount3.setText("Учить завтра: " + String.valueOf(tomorrow));
+        textLabel_wordsCount3.setText("Учить завтра: " + wordsLTomorrow);
 
         TextView textLabel_wordsCount4 = (TextView) findViewById(R.id.main_words_new);
-        int neww = dbHelper.countWords(currentDicts[0].getId(), 0, 0);
-        textLabel_wordsCount4.setText("Новых слов: " + String.valueOf(neww));
+        textLabel_wordsCount4.setText("Новых слов: " + wordsLNew);
     }
 
     @Override

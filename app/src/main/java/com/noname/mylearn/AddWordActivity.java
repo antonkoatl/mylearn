@@ -2,13 +2,12 @@ package com.noname.mylearn;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class AddWord extends ActionBarActivity {
+public class AddWordActivity extends ActionBarActivity {
     // Действие для которого была вызвана активити
     public static final String ACTION = "action";
     public static final int ADD_WORD = 1;
@@ -67,24 +66,24 @@ public class AddWord extends ActionBarActivity {
     public void saveOnClick(View v){
         if (v.getId() == R.id.button_save) {
             if (action == ADD_WORD) {
-                setResult(EditDict.RESULT_ADDED, null);
+                setResult(EditDictActivity.RESULT_ADDED, null);
                 word.setWord(EditWord.getText().toString());
                 word.setTranslationFromData(EditTranslation.getText().toString());
                 dbHelper.insertWord(dict_id, word);
             }
             if (action == EDIT_WORD) {
-                setResult(EditDict.RESULT_EDITED, null);
+                setResult(EditDictActivity.RESULT_EDITED, null);
                 word.setWord(EditWord.getText().toString());
                 word.setTranslationFromData(EditTranslation.getText().toString());
-                dbHelper.updateWordById(word, dict_id);
+                dbHelper.updateWord(word);
             }
             finish();
         }
 
         if (v.getId() == R.id.edit_word_btn_del) {
             if (action == EDIT_WORD) {
-                setResult(EditDict.RESULT_EDITED, null);
-                dbHelper.deleteWordById(word, dict_id);
+                setResult(EditDictActivity.RESULT_EDITED, null);
+                dbHelper.deleteWordById(word.getId(), dict_id);
             }
             finish();
         }

@@ -7,6 +7,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LearnActivity extends ActionBarActivity implements LearnFragment.LearnFragmentListener {
@@ -23,9 +24,9 @@ public class LearnActivity extends ActionBarActivity implements LearnFragment.Le
         Intent intent = getIntent();
 
         // извлекаем id текущего словаря
-        long idDict = intent.getLongExtra(MainActivity.DICT_ID, -1);
+        long[] dict_ids = intent.getLongArrayExtra(MainActivity.DICT_IDS);
 
-        mAdapter = new LearnAdapter(getSupportFragmentManager(), idDict, DBHelper.getInstance(this));
+        mAdapter = new LearnAdapter(getSupportFragmentManager(), dict_ids, DBHelper.getInstance(this));
 
         mPager = (LockableViewPager) findViewById(R.id.pager);
         mPager.setSwipeLocked(true);
@@ -67,6 +68,11 @@ public class LearnActivity extends ActionBarActivity implements LearnFragment.Le
         mAdapter.forcedWord = word;
         mAdapter.notifyDataSetChanged();
         mAdapter.wordsToLearn = null;
+    }
+
+    @Override
+    public List<Word> loadWordsForLearn(int offset, int count, int state_from, int state_to, boolean asc) {
+        return mAdapter.loadWordsForLearn(offset, count, state_from, state_to, asc);
     }
 
 }

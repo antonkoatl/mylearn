@@ -7,6 +7,7 @@ public class Word implements Parcelable {
     private String word;
     private String translation;
     private long id = -1;
+    private long dict_id = -1;
 
     // Статус слова при изучении
     public static final int S_NEW = 0;
@@ -62,6 +63,14 @@ public class Word implements Parcelable {
         return id;
     }
 
+    public void setDictId(long id) {
+        this.dict_id = id;
+    }
+
+    public long getDictId() {
+        return dict_id;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -74,6 +83,7 @@ public class Word implements Parcelable {
         dest.writeString(translation);
         dest.writeLong(id);
         dest.writeInt(stat);
+        dest.writeLong(dict_id);
     }
 
     // распаковываем объект из Parcel
@@ -87,6 +97,15 @@ public class Word implements Parcelable {
         }
     };
 
+    // конструктор, считывающий данные из Parcel
+    private Word(Parcel parcel) {
+        word = parcel.readString();
+        translation = parcel.readString();
+        id = parcel.readLong();
+        stat = parcel.readInt();
+        dict_id = parcel.readLong();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -96,7 +115,6 @@ public class Word implements Parcelable {
 
         if (!getWord().equals(word1.getWord())) return false;
         return translation.equals(word1.translation);
-
     }
 
     @Override
@@ -104,14 +122,6 @@ public class Word implements Parcelable {
         int result = getWord().hashCode();
         result = 31 * result + translation.hashCode();
         return result;
-    }
-
-    // конструктор, считывающий данные из Parcel
-    private Word(Parcel parcel) {
-        word = parcel.readString();
-        translation = parcel.readString();
-        id = parcel.readLong();
-        stat = parcel.readInt();
     }
 
     public int getStat() {

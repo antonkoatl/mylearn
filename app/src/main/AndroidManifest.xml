@@ -18,11 +18,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".EditDict"
+            android:name=".EditDictActivity"
             android:label="@string/title_activity_edit_dict" >
         </activity>
         <activity
-            android:name=".AddWord"
+            android:name=".AddWordActivity"
             android:label="@string/title_activity_add_word" >
         </activity>
         <activity
@@ -30,7 +30,7 @@
             android:label="@string/title_activity_learn_activity" >
         </activity>
         <activity
-            android:name=".DictDialog"
+            android:name=".DictActivity"
             android:label="@string/title_activity_dict_dialog" >
         </activity>
     </application>

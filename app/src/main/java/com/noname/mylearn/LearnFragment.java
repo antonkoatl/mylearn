@@ -17,7 +17,6 @@ import java.util.List;
 
 public class LearnFragment extends Fragment implements View.OnClickListener {
     static final String ARGUMENT_WORD = "arg_word";
-    static final String ARGUMENT_DICT_ID = "arg_dict_id";
 
     static final int NEW = 0;
     static final int TEST = 1;
@@ -27,7 +26,6 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
     int type;
 
     Word word;
-    long dictId;
     DBHelper dbHelper;
 
     ArrayList<Word> test_variants;
@@ -38,6 +36,8 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
         List<Word> getCurrentWords();
         void setDebugInfo();
         void forceWord(Word word);
+
+        List<Word> loadWordsForLearn(int count, int offset, int state_from, int state_to, boolean asc);
     }
 
     private LearnFragmentListener mListener;
@@ -54,11 +54,10 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    static LearnFragment newInstance(Word word, long dict_id) {
+    static LearnFragment newInstance(Word word) {
         LearnFragment pageFragment = new LearnFragment();
         Bundle arguments = new Bundle();
         arguments.putParcelable(ARGUMENT_WORD, word);
-        arguments.putLong(ARGUMENT_DICT_ID, dict_id);
         pageFragment.setArguments(arguments);
         return pageFragment;
     }
@@ -67,40 +66,39 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         word = getArguments().getParcelable(ARGUMENT_WORD);
-        dictId = getArguments().getLong(ARGUMENT_DICT_ID);
 
         if (word == null) {
             type = NOWORD;
         } else {
             switch (word.getStat()) {
-                case 0:
+                case Word.S_NEW:
                     type = NEW;
                     break;
-                case 1:
+                case Word.S_TEST1:
                     type = TEST;
                     break;
-                case 2:
+                case Word.S_TYPE1:
                     type = TYPE;
                     break;
-                case 3:
+                case Word.S_TEST2:
                     type = TEST;
                     break;
-                case 4:
+                case Word.S_TYPE2:
                     type = TYPE;
                     break;
-                case 5:
+                case Word.S_CNTRL:
                     type = CONTROL;
                     break;
-                case 6:
+                case Word.S_SM_TEST1:
                     type = TEST;
                     break;
-                case 7:
+                case Word.S_SM_TYPE1:
                     type = TYPE;
                     break;
-                case 8:
+                case Word.S_SM_CNTRL:
                     type = CONTROL;
                     break;
-                case 9:
+                case Word.S_LM_CNTRL:
                     type = CONTROL;
                     break;
             }
@@ -122,12 +120,13 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
 
         switch (type) {
             case NEW:
-                view = inflater.inflate(R.layout.learn_fragment_new, null);
+                // inflate attachToRoot must be false for fragments
+                view = inflater.inflate(R.layout.learn_fragment_new, container, false);
                 Button button_next = (Button) view.findViewById(R.id.learn_button_next);
                 button_next.setOnClickListener(this);
                 break;
             case TEST:
-                view = inflater.inflate(R.layout.learn_fragment_test, null);
+                view = inflater.inflate(R.layout.learn_fragment_test, container, false);
 
                 if (test_variants == null) {
                     List<Word> variants = new ArrayList<>();
@@ -136,7 +135,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                         if (!w.equals(word)) variants.add(w);
                     }
 
-                    for (Word w : dbHelper.loadWordsForLearn(dictId, 10, 0, 0, 8, false)) {
+                    for (Word w : mListener.loadWordsForLearn(10, 0, Word.S_NEW, Word.S_SM_CNTRL, false)) {
                         if (!w.equals(word)) variants.add(w);
                     }
 
@@ -179,12 +178,12 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                 button4.setTag(test_variants.get(3).getId());
                 break;
             case TYPE:
-                view = inflater.inflate(R.layout.learn_fragment_type, null);
+                view = inflater.inflate(R.layout.learn_fragment_type, container, false);
                 Button button_next2 = (Button) view.findViewById(R.id.learn_button_next);
                 button_next2.setOnClickListener(this);
                 break;
             case CONTROL:
-                view = inflater.inflate(R.layout.learn_fragment_control, null);
+                view = inflater.inflate(R.layout.learn_fragment_control, container, false);
                 Button button5 = (Button) view.findViewById(R.id.learn_button_choice1);
                 button5.setOnClickListener(this);
                 Button button6 = (Button) view.findViewById(R.id.learn_button_choice2);
@@ -195,7 +194,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                 button8.setOnClickListener(this);
                 break;
             case NOWORD:
-                view = inflater.inflate(R.layout.learn_fragment_filler, null);
+                view = inflater.inflate(R.layout.learn_fragment_filler, container, false);
                 TextView tv_w = (TextView) view.findViewById(R.id.learn_filler_text);
                 tv_w.setText("Нет слов для изучения");
                 break;
@@ -220,7 +219,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                 switch (type) {
                     case NEW:
                         word.updateStat(Word.ST_SUCCESS);
-                        dbHelper.updateWordById(word, dictId);
+                        dbHelper.updateWord(word);
                         mListener.nextPage(false);
                         break;
                     case TYPE:
@@ -230,7 +229,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                             word.updateStat(Word.ST_SUCCESS);
                             v.setBackgroundColor(getResources().getColor(R.color.right));
                         } else {
-                            if (dbHelper.chkWord(entered_var, word.getTranslationData(), dictId) != null){
+                            if (dbHelper.getWord(entered_var, word.getTranslationData(), word.getDictId()) != null){
                                 Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Введите другое слово же!", Toast.LENGTH_SHORT);
                                 toast.show();
                                 break;
@@ -240,7 +239,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                                 v.setBackgroundColor(getResources().getColor(R.color.wrong));
                             }
                         }
-                        dbHelper.updateWordById(word, dictId);
+                        dbHelper.updateWord(word);
                         mListener.nextPage(true);
                         break;
                 }
@@ -259,7 +258,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                             v.setBackgroundColor(getResources().getColor(R.color.wrong));
                             mListener.forceWord(word);
                         }
-                        dbHelper.updateWordById(word, dictId);
+                        dbHelper.updateWord(word);
                         mListener.nextPage(true);
                         break;
                     case CONTROL:
@@ -278,7 +277,7 @@ public class LearnFragment extends Fragment implements View.OnClickListener {
                                 word.updateStat(Word.ST_SUCCESS);
                                 break;
                         }
-                        dbHelper.updateWordById(word, dictId);
+                        dbHelper.updateWord(word);
                         mListener.nextPage(false);
                         break;
                 }
